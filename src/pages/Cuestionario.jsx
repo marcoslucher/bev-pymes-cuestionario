@@ -129,7 +129,7 @@ export default function Cuestionario({ version, demo = false }) {
 
   const cabecera = (
     <div className="cabecera">
-      <h1>Estudio BEV — PYMEs Españolas</h1>
+      <h1>Brecha Estratégica Vertical en PYMEs Españolas</h1>
       <p>{empresa?.nombre || codigo} ·{' '}
         <span className={`version-badge ${BADGE[version]}`}>{VERSION_LABEL[version]}</span>
         {demo && <span style={{ marginLeft: 8, fontSize: '0.75rem', background: '#fef9c3',

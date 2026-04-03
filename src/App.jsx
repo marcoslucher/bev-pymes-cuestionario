@@ -45,8 +45,8 @@ export default function App({ demo = false }) {
     <div className="contenedor">
       <div className="tarjeta">
         <div className="cabecera">
-          <h1>Estudio sobre alineamiento estratégico en PYMEs españolas</h1>
-          <p>Universidad Europea Miguel de Cervantes (UEMC) · Ingeniería de Organización Industrial</p>
+          <h1>Brecha Estratégica Vertical en PYMEs Españolas</h1>
+          <p>Estudio de diagnóstico multinivel · Universidad Europea Miguel de Cervantes (UEMC)</p>
         </div>
 
         <div className="tarjeta-cuerpo">
@@ -132,7 +132,8 @@ export default function App({ demo = false }) {
 
           <div className="pie-investigador">
             <p><strong>Investigador:</strong> Marcos Lucas Hernández</p>
-            <p>Grado en Ingeniería de Organización Industrial · UEMC</p>
+            <p>Trabajo de Fin de Grado — Ingeniería de Organización Industrial · UEMC</p>
+            <p><em>"Brecha Estratégica Vertical en PYMEs Españolas: Desarrollo de un Instrumento de Diagnóstico Multinivel"</em></p>
             <p>Tutora: Dra. Patricia Lerma Escudero</p>
           </div>
         </div>
