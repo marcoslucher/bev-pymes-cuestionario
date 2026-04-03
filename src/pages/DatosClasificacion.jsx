@@ -63,7 +63,7 @@ function Select({ value, onChange, options, placeholder }) {
 
 export default function DatosClasificacion({ version, empresa, onComplete }) {
   // empresa data — only director, only if not yet filled
-  const needsEmpresaData = version === 'D' && !empresa?.sector
+  const needsEmpresaData = version === 'D' && (!empresa?.sector || demo)
 
   const [nombreEmpresa, setNombreEmpresa] = useState(empresa?.nombre || '')
   const [sector, setSector] = useState('')
