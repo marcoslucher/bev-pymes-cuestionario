@@ -8,9 +8,9 @@ const SECTORES = [
   'Educación y formación','Agricultura y alimentación','Otro'
 ]
 const EMPLEADOS_OPTS = [
-  { label: '2 a 9 empleados (Microempresa)', estrato: 'A' },
-  { label: '10 a 49 empleados (Pequeña empresa)', estrato: 'B' },
-  { label: '50 a 249 empleados (Mediana empresa)', estrato: 'C' },
+  { label: '2 a 9 empleados (Microempresa)' },
+  { label: '10 a 49 empleados (Pequeña empresa)' },
+  { label: '50 a 249 empleados (Mediana empresa)' },
 ]
 const ANTIGUEDAD_EMPRESA = [
   'Menos de 2 años','2 a 5 años','5 a 10 años','10 a 20 años','Más de 20 años'
@@ -61,18 +61,17 @@ function Select({ value, onChange, options, placeholder }) {
   )
 }
 
-export default function DatosClasificacion({ version, empresa, onComplete }) {
-  // empresa data — only director, only if not yet filled
+export default function DatosClasificacion({ version, empresa, onComplete, demo = false }) {
+  // Director siempre ve datos empresa si: no hay sector guardado O estamos en demo
   const needsEmpresaData = version === 'D' && (!empresa?.sector || demo)
 
-  const [nombreEmpresa, setNombreEmpresa] = useState(empresa?.nombre || '')
+  const [nombreEmpresa, setNombreEmpresa] = useState('')
   const [sector, setSector] = useState('')
   const [sectorOtro, setSectorOtro] = useState('')
   const [empleados, setEmpleados] = useState('')
   const [antiguedadEmpresa, setAntiguedadEmpresa] = useState('')
   const [familiar, setFamiliar] = useState('')
 
-  // individual data — all versions
   const [antiguedadRespondente, setAntiguedadRespondente] = useState('')
   const [area, setArea] = useState('')
   const [areaOtro, setAreaOtro] = useState('')
@@ -85,8 +84,7 @@ export default function DatosClasificacion({ version, empresa, onComplete }) {
 
   const isValid = () => {
     if (needsEmpresaData) {
-      if (!nombreEmpresa.trim() || !sector || !empleados ||
-          !antiguedadEmpresa || !familiar) return false
+      if (!nombreEmpresa.trim() || !sector || !empleados || !antiguedadEmpresa || !familiar) return false
       if (sector === 'Otro' && !sectorOtro.trim()) return false
     }
     if (!antiguedadRespondente) return false
@@ -104,8 +102,7 @@ export default function DatosClasificacion({ version, empresa, onComplete }) {
     setGuardando(true)
     setError('')
 
-    // If director and empresa data was missing, update Supabase
-    if (needsEmpresaData) {
+    if (needsEmpresaData && !demo) {
       const estrato = empleados.includes('2 a 9') ? 'A'
                     : empleados.includes('10 a 49') ? 'B' : 'C'
       const { error: err } = await supabase
@@ -114,6 +111,7 @@ export default function DatosClasificacion({ version, empresa, onComplete }) {
           nombre: nombreEmpresa.trim(),
           sector: sector === 'Otro' ? sectorOtro.trim() : sector,
           estrato,
+          antiguedad_empresa: antiguedadEmpresa,
           empresa_familiar: familiar,
         })
         .eq('codigo', empresa.codigo)
@@ -136,7 +134,7 @@ export default function DatosClasificacion({ version, empresa, onComplete }) {
 
   return (
     <div>
-      {/* Datos empresa — solo primer directivo */}
+      {/* Datos empresa — director (siempre en demo, solo si faltan en real) */}
       {needsEmpresaData && (
         <div style={{ marginBottom: 28 }}>
           <div className="dimension-titulo" style={{ marginBottom: 4 }}>
@@ -148,8 +146,7 @@ export default function DatosClasificacion({ version, empresa, onComplete }) {
 
           <Campo label="Nombre de la empresa" required>
             <input
-              type="text"
-              className="campo-input"
+              type="text" className="campo-input"
               placeholder="Nombre completo de la empresa"
               value={nombreEmpresa}
               onChange={e => setNombreEmpresa(e.target.value)}
@@ -159,11 +156,9 @@ export default function DatosClasificacion({ version, empresa, onComplete }) {
           <Campo label="Sector de actividad" required>
             <Select value={sector} onChange={setSector} options={SECTORES} />
             {sector === 'Otro' && (
-              <input
-                type="text" className="campo-input" style={{ marginTop: 8 }}
+              <input type="text" className="campo-input" style={{ marginTop: 8 }}
                 placeholder="Indique el sector"
-                value={sectorOtro} onChange={e => setSectorOtro(e.target.value)}
-              />
+                value={sectorOtro} onChange={e => setSectorOtro(e.target.value)} />
             )}
           </Campo>
 
@@ -182,7 +177,7 @@ export default function DatosClasificacion({ version, empresa, onComplete }) {
         </div>
       )}
 
-      {/* Si empresa ya tiene nombre, mostrarlo */}
+      {/* Si empresa ya tiene datos y no es demo */}
       {!needsEmpresaData && empresa?.nombre && (
         <div style={{
           padding: '10px 14px', background: '#f0f7ff', borderRadius: 8,
@@ -193,12 +188,10 @@ export default function DatosClasificacion({ version, empresa, onComplete }) {
         </div>
       )}
 
-      {/* Datos individuales */}
+      {/* Datos individuales — todos los perfiles */}
       <div>
         <div className="dimension-titulo" style={{ marginBottom: 4 }}>Sus datos</div>
-        <div className="dimension-instruccion">
-          Datos individuales del respondente.
-        </div>
+        <div className="dimension-instruccion">Datos individuales del respondente.</div>
 
         <Campo label="Antigüedad en esta empresa" required>
           <Select value={antiguedadRespondente} onChange={setAntiguedadRespondente}
@@ -210,11 +203,9 @@ export default function DatosClasificacion({ version, empresa, onComplete }) {
             <Campo label="Área funcional" required>
               <Select value={area} onChange={setArea} options={AREAS} />
               {area === 'Otro' && (
-                <input
-                  type="text" className="campo-input" style={{ marginTop: 8 }}
+                <input type="text" className="campo-input" style={{ marginTop: 8 }}
                   placeholder="Indique su área"
-                  value={areaOtro} onChange={e => setAreaOtro(e.target.value)}
-                />
+                  value={areaOtro} onChange={e => setAreaOtro(e.target.value)} />
               )}
             </Campo>
 
