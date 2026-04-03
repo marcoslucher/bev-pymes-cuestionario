@@ -20,13 +20,21 @@ const VERSION_LABEL = {
 const BADGE = { D: 'badge-d', MI: 'badge-mi', EO: 'badge-eo' }
 const DIM_KEYS = ['D1','D2','D3','D4','D5','D6','D7','D8','D9','D10']
 
-// Steps: 0=datos, 1-10=dimensiones, 11=pregunta final
-export default function Cuestionario({ version }) {
+// Empresa ficticia para demo
+const DEMO_EMPRESA = {
+  codigo: 'DEMO',
+  nombre: 'Empresa de demostración',
+  estrato: 'B',
+  sector: 'Tecnología e informática',
+  empresa_familiar: 'No'
+}
+
+export default function Cuestionario({ version, demo = false }) {
   const { codigo } = useParams()
   const navigate = useNavigate()
 
-  const [empresa, setEmpresa] = useState(null)
-  const [cargando, setCargando] = useState(true)
+  const [empresa, setEmpresa] = useState(demo ? DEMO_EMPRESA : null)
+  const [cargando, setCargando] = useState(!demo)
   const [enviando, setEnviando] = useState(false)
   const [paso, setPaso] = useState(0)
   const [respuestas, setRespuestas] = useState({})
@@ -36,6 +44,7 @@ export default function Cuestionario({ version }) {
   const [errorEnvio, setErrorEnvio] = useState('')
 
   useEffect(() => {
+    if (demo) return
     const verificar = async () => {
       const { data, error } = await supabase
         .from('empresas')
@@ -47,7 +56,7 @@ export default function Cuestionario({ version }) {
       setCargando(false)
     }
     verificar()
-  }, [codigo, navigate])
+  }, [codigo, navigate, demo])
 
   if (cargando) return (
     <div className="contenedor">
@@ -67,13 +76,12 @@ export default function Cuestionario({ version }) {
 
   const handleDatosComplete = async (datos) => {
     setDatosClasif(datos)
-    // If director and empresa data was missing, update it in Supabase
-    if (version === 'D' && !empresa.sector && datos.sector) {
-      const estrato = datos.empleados.includes('2 a 9') ? 'A'
-                    : datos.empleados.includes('10 a 49') ? 'B' : 'C'
+    if (!demo && version === 'D' && !empresa.sector && datos.sector) {
+      const estrato = datos.empleados?.includes('2 a 9') ? 'A'
+                    : datos.empleados?.includes('10 a 49') ? 'B' : 'C'
       await supabase.from('empresas').update({
+        nombre: datos.nombre,
         sector: datos.sector,
-        empleados: parseInt(datos.empleados),
         estrato,
         empresa_familiar: datos.empresa_familiar,
       }).eq('codigo', codigo.toUpperCase())
@@ -83,6 +91,13 @@ export default function Cuestionario({ version }) {
 
   const handleEnviar = async () => {
     if (!disponibilidad) { setErrorEnvio('Por favor, responde la pregunta final.'); return }
+
+    // Demo mode: skip Supabase, go directly to gracias
+    if (demo) {
+      navigate('/gracias', { state: { version, empresa: empresa.nombre, demo: true } })
+      return
+    }
+
     setEnviando(true); setErrorEnvio('')
 
     const fila = { empresa_codigo: codigo.toUpperCase() }
@@ -90,8 +105,6 @@ export default function Cuestionario({ version }) {
       const n = dim.toLowerCase()
       ;[1,2,3,4,5,6].forEach(i => { fila[`${n}_${i}`] = respuestas[`${dim}_${i}`] })
     })
-
-    // Add classification data
     if (datosClasif) {
       fila.antiguedad_respondente = datosClasif.antiguedad_respondente
       if (version !== 'D') {
@@ -101,7 +114,6 @@ export default function Cuestionario({ version }) {
         if (version === 'EO') fila.jornada = datosClasif.jornada
       }
     }
-
     fila.disponibilidad_ampliacion = disponibilidad
     if (emailContacto.trim()) fila.email_contacto = emailContacto.trim()
 
@@ -118,8 +130,10 @@ export default function Cuestionario({ version }) {
   const cabecera = (
     <div className="cabecera">
       <h1>Estudio BEV — PYMEs Españolas</h1>
-      <p>{empresa.nombre || codigo} ·{' '}
+      <p>{empresa?.nombre || codigo} ·{' '}
         <span className={`version-badge ${BADGE[version]}`}>{VERSION_LABEL[version]}</span>
+        {demo && <span style={{ marginLeft: 8, fontSize: '0.75rem', background: '#fef9c3',
+          color: '#854d0e', padding: '2px 8px', borderRadius: 10 }}>DEMO</span>}
       </p>
     </div>
   )
@@ -130,10 +144,18 @@ export default function Cuestionario({ version }) {
       <div className="tarjeta">
         {cabecera}
         <div className="tarjeta-cuerpo">
+          {demo && (
+            <div style={{ background: '#fef9c3', border: '1.5px solid #f0b429',
+              borderRadius: 8, padding: '10px 16px', marginBottom: 20,
+              fontSize: '0.85rem', color: '#854d0e', fontWeight: 500 }}>
+              🔍 Modo demostración — Las respuestas no se almacenarán
+            </div>
+          )}
           <DatosClasificacion
             version={version}
-            empresaDatos={empresa}
+            empresa={empresa}
             onComplete={handleDatosComplete}
+            demo={demo}
           />
         </div>
       </div>
@@ -164,9 +186,7 @@ export default function Cuestionario({ version }) {
                 {[1,2,3,4,5,6,7].map(n => (
                   <div key={n} className="escala-celda">
                     <div className="escala-num"
-                      style={{ background: `hsl(${215 + n*8}, 60%, ${70 - n*6}%)` }}>
-                      {n}
-                    </div>
+                      style={{ background: `hsl(${215 + n*8}, 60%, ${70 - n*6}%)` }}>{n}</div>
                     <div className="escala-desc">
                       {n === 1 ? 'Mínimo' : n === 4 ? 'Intermedio' : n === 7 ? 'Máximo' : ''}
                     </div>
@@ -292,7 +312,7 @@ export default function Cuestionario({ version }) {
               disabled={!disponibilidad || enviando}
               style={{ background: !disponibilidad || enviando ? '#d1d9e6' : '#1a7a4a',
                        color: !disponibilidad || enviando ? '#888' : 'white' }}>
-              {enviando ? 'Enviando...' : '✓ Enviar respuestas'}
+              {enviando ? 'Enviando...' : demo ? '✓ Finalizar demostración' : '✓ Enviar respuestas'}
             </button>
           </div>
         </div>

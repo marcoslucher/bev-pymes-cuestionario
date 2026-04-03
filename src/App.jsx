@@ -6,41 +6,39 @@ const PERFILES = [
   {
     id: 'D',
     label: 'Director / Fundador / Gerente',
-    color: '#1e3a5f',
-    bg: '#dbeafe',
-    textColor: '#1e40af',
+    color: '#1e3a5f', bg: '#dbeafe', textColor: '#1e40af',
     info: 'Selecciona este perfil si eres el responsable principal de la empresa, tomas las decisiones estratégicas y defines las prioridades del negocio. Incluye socios directivos y propietarios con funciones de gestión.'
   },
   {
     id: 'MI',
     label: 'Mando intermedio / Responsable de área',
-    color: '#15803d',
-    bg: '#dcfce7',
-    textColor: '#15803d',
+    color: '#15803d', bg: '#dcfce7', textColor: '#15803d',
     info: 'Selecciona este perfil si coordinas un equipo o área dentro de la empresa, actuando como enlace entre la dirección y los empleados operativos. Incluye jefes de equipo, responsables de departamento o supervisores.'
   },
   {
     id: 'EO',
     label: 'Empleado operativo',
-    color: '#854d0e',
-    bg: '#fef9c3',
-    textColor: '#854d0e',
+    color: '#854d0e', bg: '#fef9c3', textColor: '#854d0e',
     info: 'Selecciona este perfil si realizas tareas operativas sin responsabilidades directivas formales sobre otras personas. Incluye técnicos, operarios, administrativos y cualquier empleado sin funciones de supervisión.'
   }
 ]
 
-export default function App() {
+export default function App({ demo = false }) {
   const [perfil, setPerfil] = useState(null)
   const [infoAbierto, setInfoAbierto] = useState(null)
   const navigate = useNavigate()
-
-  // Get codigo from URL if present (used by /empresa/:codigo route)
-  const codigo = window.location.pathname.split('/empresa/')[1] || null
+  const { codigo } = useParams()
 
   const handleComenzar = () => {
-    if (!perfil || !codigo) return
-    const ruta = perfil === 'D' ? `/d/${codigo}` : perfil === 'MI' ? `/mi/${codigo}` : `/eo/${codigo}`
-    navigate(ruta)
+    if (!perfil) return
+    if (demo) {
+      const ruta = perfil === 'D' ? '/demo/d' : perfil === 'MI' ? '/demo/mi' : '/demo/eo'
+      navigate(ruta)
+    } else {
+      const cod = codigo || ''
+      const ruta = perfil === 'D' ? `/d/${cod}` : perfil === 'MI' ? `/mi/${cod}` : `/eo/${cod}`
+      navigate(ruta)
+    }
   }
 
   return (
@@ -52,7 +50,16 @@ export default function App() {
         </div>
 
         <div className="tarjeta-cuerpo">
-          {/* Texto introductorio */}
+          {demo && (
+            <div style={{
+              background: '#fef9c3', border: '1.5px solid #f0b429',
+              borderRadius: 8, padding: '10px 16px', marginBottom: 20,
+              fontSize: '0.85rem', color: '#854d0e', fontWeight: 500
+            }}>
+              🔍 Modo demostración — Las respuestas no se almacenarán
+            </div>
+          )}
+
           <div className="intro-bloque">
             <p>
               Este cuestionario forma parte de un proyecto de investigación académica de la
@@ -71,7 +78,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Selector de perfil */}
           <div className="perfil-titulo">Seleccione su perfil en la organización</div>
 
           <div className="perfiles-lista">
@@ -87,43 +93,32 @@ export default function App() {
                   onClick={() => { setPerfil(p.id); setInfoAbierto(null) }}
                 >
                   <div className="perfil-btn-inner">
-                    <span
-                      className="perfil-radio"
+                    <span className="perfil-radio"
                       style={{ borderColor: perfil === p.id ? p.color : '#d1d9e6',
-                               background: perfil === p.id ? p.color : 'transparent' }}
-                    />
-                    <span
-                      className="perfil-label"
-                      style={{ color: perfil === p.id ? p.textColor : '#1a1a2e', fontWeight: perfil === p.id ? 700 : 500 }}
-                    >
+                               background: perfil === p.id ? p.color : 'transparent' }} />
+                    <span className="perfil-label"
+                      style={{ color: perfil === p.id ? p.textColor : '#1a1a2e',
+                               fontWeight: perfil === p.id ? 700 : 500 }}>
                       {p.label}
                     </span>
                   </div>
-                  <button
-                    type="button"
-                    className="info-btn"
+                  <button type="button" className="info-btn"
                     onClick={e => { e.stopPropagation(); setInfoAbierto(infoAbierto === p.id ? null : p.id) }}
-                    title="Más información sobre este perfil"
-                  >
-                    ⓘ
-                  </button>
+                    title="Más información sobre este perfil">ⓘ</button>
                 </button>
-
                 {infoAbierto === p.id && (
-                  <div className="perfil-info-texto">
-                    {p.info}
-                  </div>
+                  <div className="perfil-info-texto">{p.info}</div>
                 )}
               </div>
             ))}
           </div>
 
-          {/* Botón comenzar */}
           <div style={{ marginTop: 28 }}>
             <button
               className="btn btn-primario"
-              style={{ width: '100%', opacity: perfil && codigo ? 1 : 0.45, cursor: perfil && codigo ? 'pointer' : 'not-allowed' }}
-              disabled={!perfil || !codigo}
+              style={{ width: '100%', opacity: perfil ? 1 : 0.45,
+                       cursor: perfil ? 'pointer' : 'not-allowed' }}
+              disabled={!perfil}
               onClick={handleComenzar}
             >
               Comenzar cuestionario →
@@ -135,7 +130,6 @@ export default function App() {
             )}
           </div>
 
-          {/* Pie investigador */}
           <div className="pie-investigador">
             <p><strong>Investigador:</strong> Marcos Lucas Hernández</p>
             <p>Grado en Ingeniería de Organización Industrial · UEMC</p>
