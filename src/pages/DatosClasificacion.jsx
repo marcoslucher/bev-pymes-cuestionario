@@ -188,6 +188,15 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
           <Select value={antiguedadRespondente} onChange={setAntiguedadRespondente} options={ANTIGUEDAD_RESPONDENTE} />
         </Campo>
 
+        {version === 'MI' && (
+          <div style={{
+            background: '#fffbea', border: '1px solid #f0b429', borderRadius: 8,
+            padding: '10px 14px', marginBottom: 16, fontSize: '0.83rem',
+            color: '#744210', lineHeight: 1.5
+          }}>
+            <strong>Mando intermedio formal:</strong> cargo reconocido en la empresa (jefe de equipo, responsable de área, supervisor, etc.) con supervisión habitual de al menos una persona. Si no cumple estas condiciones, su perfil es el de empleado operativo.
+          </div>
+        )}
         {version !== 'D' && (
           <>
             <Campo label="Área funcional" required>

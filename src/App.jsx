@@ -13,13 +13,13 @@ const PERFILES = [
     id: 'MI',
     label: 'Mando intermedio / Responsable de área',
     color: '#15803d', bg: '#dcfce7', textColor: '#15803d',
-    info: 'Seleccione este perfil si coordina usted un equipo o área dentro de la empresa, actuando como enlace entre la dirección y los empleados operativos. Incluye jefes de equipo, responsables de departamento y supervisores.'
+    info: 'Seleccione este perfil si cumple las tres condiciones siguientes: (1) ocupa un cargo reconocido formalmente en la empresa con un equipo o área a su cargo; (2) supervisa de forma habitual el trabajo de al menos una persona; y (3) actúa como enlace entre la dirección y los empleados en la transmisión de directrices. Si coordina puntualmente a compañeros pero sin cargo ni supervisión continuada reconocida, seleccione «Empleado operativo».'
   },
   {
     id: 'EO',
     label: 'Empleado operativo',
     color: '#854d0e', bg: '#fef9c3', textColor: '#854d0e',
-    info: 'Seleccione este perfil si realiza usted tareas operativas sin responsabilidades directivas formales sobre otras personas. Incluye técnicos, operarios, administrativos y cualquier empleado sin funciones de supervisión.'
+    info: 'Seleccione este perfil si realiza tareas operativas sin un cargo de supervisión reconocido formalmente en la empresa. Si tiene dudas entre este perfil y el de mando intermedio, seleccione este: la coordinación puntual de compañeros sin cargo reconocido ni supervisión continuada no constituye un mando intermedio formal.'
   }
 ]
 
