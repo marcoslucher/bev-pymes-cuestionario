@@ -242,10 +242,8 @@ export default function App({ demo = false }) {
           </div>
 
           <div className="pie-investigador">
-            <p>Autor: Marcos Lucas Hernández</p>
-            <p>Trabajo de Fin de Grado — Ingeniería de Organización Industrial · UEMC</p>
-            <p><em>"Brecha Estratégica Vertical en PYMEs Españolas: Desarrollo de un Instrumento de Diagnóstico Multinivel"</em></p>
-            <p>Tutora: Dra. Patricia Lerma Escudero</p>
+            <p><em>«Brecha Estratégica Vertical en PYMEs Españolas: Desarrollo de un Instrumento de Diagnóstico Multinivel»</em></p>
+            <p>Marcos Lucas Hernández · Universidad Europea Miguel de Cervantes (UEMC)</p>
           </div>
         </div>
       </div>
