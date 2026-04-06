@@ -42,15 +42,24 @@ export default function Gracias() {
               {!demo && <>{' '}· {VERSION_LABEL[version]}</>}
             </p>
 
-            {!demo && (
-              <p style={{ marginBottom: 28, color: '#555e7a' }}>
-                Muchas gracias por su participación.
-                Su empresa recibirá el informe diagnóstico de alineamiento estratégico
-                una vez finalizada la recogida de datos.
+            {!demo && version === 'D' && (
+              <p style={{ marginBottom: 28, color: '#374151' }}>
+                Muchas gracias por su tiempo y por liderar la participación de su empresa
+                en este estudio. Su contribución es fundamental para mejorar el
+                conocimiento sobre el alineamiento estratégico en las PYMEs españolas.
+                En cuanto finalice la recogida de datos, recibirá el informe personalizado
+                de diagnóstico de su empresa.
+              </p>
+            )}
+            {!demo && version !== 'D' && (
+              <p style={{ marginBottom: 28, color: '#374151' }}>
+                Muchas gracias por su tiempo y por contribuir a la mejora del conocimiento
+                sobre el alineamiento estratégico en las empresas. Su participación es
+                muy valiosa para este estudio.
               </p>
             )}
 
-            {/* Bloque exclusivo para Versión Dirección */}
+            {/* Bloque exclusivo para Versión Dirección — enlace equipo */}
             {!demo && version === 'D' && codigo && (
               <div style={{
                 background: '#eef6ff',
@@ -58,7 +67,7 @@ export default function Gracias() {
                 borderRadius: 12,
                 padding: '24px 28px',
                 textAlign: 'left',
-                marginBottom: 24,
+                marginBottom: 20,
               }}>
                 <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#1e3a5f', marginBottom: 10 }}>
                   📋 Siguiente paso — comparta el estudio con su equipo
@@ -91,6 +100,35 @@ export default function Gracias() {
                 </button>
                 <p style={{ fontSize: '0.80rem', color: '#6b7280', marginTop: 12 }}>
                   El enlace es exclusivo de su empresa. Cada participante tardará entre 8 y 12 minutos.
+                </p>
+              </div>
+            )}
+
+            {/* Bloque beneficio herramienta — solo Dirección */}
+            {!demo && version === 'D' && (
+              <div style={{
+                background: '#f0fdf4',
+                border: '1.5px solid #22c55e',
+                borderRadius: 12,
+                padding: '20px 24px',
+                textAlign: 'left',
+                marginBottom: 24,
+              }}>
+                <div style={{ fontWeight: 700, fontSize: '1rem', color: '#15803d', marginBottom: 10 }}>
+                  🎯 Acceso gratuito a la futura herramienta de alineamiento estratégico
+                </div>
+                <p style={{ fontSize: '0.88rem', color: '#374151', marginBottom: 10 }}>
+                  El desarrollo de una <strong>herramienta de diagnóstico continuo de
+                  alineamiento estratégico</strong> para PYMEs —similar a las evaluaciones
+                  de desempeño, pero orientada a la estrategia interna— requiere datos de un
+                  número amplio de empresas para que los resultados sean robustos y fiables.
+                </p>
+                <p style={{ fontSize: '0.88rem', color: '#374151', marginBottom: 0 }}>
+                  Si su empresa participa en las <strong>futuras ampliaciones del estudio</strong>,
+                  contribuirá directamente a hacer posible esa herramienta y, como reconocimiento,
+                  tendrá <strong>acceso permanente y sin coste</strong> a ella para uso interno.
+                  Si desea ser informado/a, indíquenoslo respondiendo a este correo o
+                  facilitando su email de contacto al completar el cuestionario.
                 </p>
               </div>
             )}

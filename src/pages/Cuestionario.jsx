@@ -94,7 +94,7 @@ export default function Cuestionario({ version, demo = false }) {
     })
 
   const handleEnviar = async () => {
-    if (!disponibilidad) { setErrorEnvio('Por favor, responda la pregunta final.'); return }
+    if (version === 'D' && !disponibilidad) { setErrorEnvio('Por favor, responda la pregunta final antes de enviar.'); return }
     if (demo) {
       navigate('/gracias', { state: { version, empresa: empresa.nombre, demo: true } })
       return
@@ -133,11 +133,12 @@ export default function Cuestionario({ version, demo = false }) {
 
     // Campos comunes a todas las versiones
     fila.antiguedad_respondente    = clasificacion?.antiguedad_respondente || null
-    fila.disponibilidad_ampliacion = disponibilidad
+    fila.disponibilidad_ampliacion = version === 'D' ? disponibilidad : null
     // Para D: usa el email recogido en clasificación; para MI/EO: el del cierre
+    // Email de contacto: solo para dirección (recogido en clasificación)
     fila.email_contacto = version === 'D'
       ? (clasificacion?.email_directivo?.toLowerCase().trim() || null)
-      : (emailContacto?.toLowerCase().trim() || null)
+      : null
 
     // Campos específicos por versión
     if (version === 'D') {
@@ -186,7 +187,7 @@ export default function Cuestionario({ version, demo = false }) {
     <div className="contenedor"><div className="tarjeta">
       <div className="cabecera">
         <h1>Estudio BEV — PYMEs Españolas</h1>
-        <p>UEMC · {empresa.nombre || (demo ? 'DEMO' : codigo)}</p>
+        <p>{empresa.nombre || (demo ? 'DEMO' : codigo)}</p>
       </div>
       <div className="tarjeta-cuerpo">
         <span className={`version-badge ${BADGE[version]}`}>{VERSION_LABEL[version]}</span>
@@ -303,7 +304,7 @@ export default function Cuestionario({ version, demo = false }) {
     <div className="contenedor"><div className="tarjeta">
       <div className="cabecera">
         <h1>Estudio BEV — PYMEs Españolas</h1>
-        <p>UEMC · {empresa.nombre || (demo ? 'DEMO' : codigo)} · {VERSION_LABEL[version]}</p>
+        <p>{clasificacion?.nombre_empresa || empresa.nombre || (demo ? 'DEMO' : codigo)} · {VERSION_LABEL[version]}</p>
       </div>
       <div className="tarjeta-cuerpo">
         <div className="progreso-texto">Sección final</div>
@@ -312,44 +313,64 @@ export default function Cuestionario({ version, demo = false }) {
         </div>
         <div className="dimension-titulo" style={{ marginBottom: 16 }}>Para terminar</div>
 
-        <div className="campo-grupo">
-          <label className="campo-label">
-            ¿Estaría disponible para participar en una posible ampliación del estudio?{' '}
-            <span style={{ color: '#e53e3e' }}>*</span>
-          </label>
-          {[
-            'Sí, con mucho gusto',
-            'Posiblemente',
-            'No, prefiero no participar en más fases'
-          ].map(op => (
-            <label key={op} style={{
-              display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px',
-              borderRadius: 8, marginBottom: 6, cursor: 'pointer',
-              border: `2px solid ${disponibilidad === op ? '#1e3a5f' : '#d1d9e6'}`,
-              background: disponibilidad === op ? '#eef3fb' : '#fff'
+        {/* ── Versión Dirección: agradecimiento + herramienta + disponibilidad ── */}
+        {version === 'D' && (
+          <p style={{ color: '#374151', marginBottom: 20, fontSize: '0.92rem' }}>
+            Muchas gracias por su tiempo y por liderar la participación de su empresa
+            en este estudio. Su contribución es fundamental para mejorar el conocimiento
+            sobre el alineamiento estratégico en las PYMEs españolas.
+          </p>
+        )}
+        {version === 'D' && (
+          <>
+            <div style={{
+              background: '#f0fdf4', border: '1.5px solid #22c55e',
+              borderRadius: 10, padding: '14px 18px', marginBottom: 20, fontSize: '0.88rem', color: '#374151'
             }}>
-              <input type="radio" name="disponibilidad" value={op}
-                checked={disponibilidad === op}
-                onChange={() => setDisponibilidad(op)} />
-              {op}
-            </label>
-          ))}
-        </div>
+              <strong style={{ color: '#15803d' }}>🎯 Acceso gratuito a la futura herramienta de alineamiento</strong>
+              <p style={{ marginTop: 6, marginBottom: 0 }}>
+                El desarrollo de una herramienta de diagnóstico continuo de alineamiento estratégico
+                —similar a las evaluaciones de desempeño, pero orientada a la estrategia interna—
+                requiere la participación de un número amplio de empresas en futuras ampliaciones.
+                Las empresas que colaboren tendrán <strong>acceso permanente y sin coste</strong> a
+                esa herramienta para uso interno.
+              </p>
+            </div>
 
-        <div className="campo-grupo" style={{ marginTop: 20 }}>
-          <label className="campo-label">
-            Email de contacto{' '}
-            <span style={{ fontSize: '0.82rem', color: '#888', fontWeight: 400 }}>
-              (opcional — solo para enviarle el informe de resultados)
-            </span>
-          </label>
-          <input
-            type="email" className="campo-input"
-            placeholder="ejemplo@email.com"
-            value={emailContacto}
-            onChange={e => setEmailContacto(e.target.value)}
-          />
-        </div>
+            <div className="campo-grupo">
+              <label className="campo-label">
+                ¿Estaría su empresa disponible para participar en futuras ampliaciones del estudio?{' '}
+                <span style={{ color: '#e53e3e' }}>*</span>
+              </label>
+              {[
+                'Sí, con mucho gusto',
+                'Posiblemente',
+                'No, prefiero no participar en más fases'
+              ].map(op => (
+                <label key={op} style={{
+                  display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px',
+                  borderRadius: 8, marginBottom: 6, cursor: 'pointer',
+                  border: `2px solid ${disponibilidad === op ? '#1e3a5f' : '#d1d9e6'}`,
+                  background: disponibilidad === op ? '#eef3fb' : '#fff'
+                }}>
+                  <input type="radio" name="disponibilidad" value={op}
+                    checked={disponibilidad === op}
+                    onChange={() => setDisponibilidad(op)} />
+                  {op}
+                </label>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* ── Versiones MI / EO: agradecimiento ── */}
+        {version !== 'D' && (
+          <p style={{ color: '#374151', marginBottom: 20, fontSize: '0.92rem' }}>
+            Muchas gracias por su tiempo y por contribuir a la mejora del conocimiento
+            sobre el alineamiento estratégico en las empresas. Puede enviar sus
+            respuestas a continuación.
+          </p>
+        )}
 
         {errorEnvio && (
           <div style={{ color: '#e53e3e', fontSize: '0.88rem', marginTop: 12 }}>
@@ -362,8 +383,8 @@ export default function Cuestionario({ version, demo = false }) {
           <button
             className="btn btn-primario"
             onClick={handleEnviar}
-            disabled={!disponibilidad || enviando}
-            style={{ background: (!disponibilidad || enviando) ? '#d1d9e6' : '#1a7a4a' }}
+            disabled={(version === 'D' && !disponibilidad) || enviando}
+            style={{ background: ((version === 'D' && !disponibilidad) || enviando) ? '#d1d9e6' : '#1a7a4a' }}
           >
             {enviando ? 'Enviando...' : '✓ Enviar respuestas'}
           </button>
@@ -382,7 +403,7 @@ export default function Cuestionario({ version, demo = false }) {
     <div className="contenedor"><div className="tarjeta">
       <div className="cabecera">
         <h1>Estudio BEV — PYMEs Españolas</h1>
-        <p>UEMC · {empresa.nombre || (demo ? 'DEMO' : codigo)} · {VERSION_LABEL[version]}</p>
+        <p>{clasificacion?.nombre_empresa || empresa.nombre || (demo ? 'DEMO' : codigo)} · {VERSION_LABEL[version]}</p>
       </div>
       <div className="tarjeta-cuerpo">
 
