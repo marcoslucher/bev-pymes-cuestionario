@@ -361,6 +361,17 @@ export default function Cuestionario({ version, demo = false }) {
                 </label>
               ))}
             </div>
+
+          <p style={{ fontSize: '0.78rem', color: '#6b7280', marginTop: 8,
+                      padding: '8px 12px', background: '#f9fafb',
+                      borderRadius: 6, borderLeft: '3px solid #d1d9e6' }}>
+            Si decide participar en futuras ampliaciones, le mantendremos informado/a
+            en el email facilitado al inicio de este cuestionario. Dicho email se
+            utilizará exclusivamente para comunicaciones relacionadas con este estudio
+            y sus ampliaciones, sin que sea cedido a terceros ni empleado con fines
+            publicitarios o comerciales, de conformidad con el Reglamento General de
+            Protección de Datos (RGPD, UE 2016/679).
+          </p>
           </>
         )}
 
