@@ -31,7 +31,6 @@ function generarCodigo() {
 
 export default function App({ demo = false }) {
   const [perfil, setPerfil]           = useState(null)
-  const [infoAbierto, setInfoAbierto] = useState(null)
   const [creando, setCreando]         = useState(false)
   const [error, setError]             = useState('')
   const [empresa, setEmpresa]         = useState(null)
@@ -178,12 +177,20 @@ export default function App({ demo = false }) {
                       {p.label}
                     </span>
                   </div>
-                  <button type="button" className="info-btn"
-                    onClick={e => { e.stopPropagation(); setInfoAbierto(infoAbierto === p.id ? null : p.id) }}
-                    title="Más información sobre este perfil">ⓘ</button>
                 </button>
-                {infoAbierto === p.id && (
-                  <div className="perfil-info-texto">{p.info}</div>
+                {perfil === p.id && (
+                  <div style={{
+                    margin: '4px 0 8px',
+                    padding: '10px 14px',
+                    background: p.bg,
+                    border: `1px solid ${p.color}33`,
+                    borderRadius: 8,
+                    fontSize: '0.83rem',
+                    color: p.textColor,
+                    lineHeight: 1.55,
+                  }}>
+                    {p.info}
+                  </div>
                 )}
               </div>
             ))}
