@@ -88,7 +88,7 @@ export default function Cuestionario({ version, demo = false }) {
 
   // Dimensión completa si todos los ítems tienen valor > 0 O son NS/NC (NSNC = -1)
   const dimensionCompleta = (dim) =>
-    [1,2,3,4,5,6].every(i => {
+    demo || [1,2,3,4,5,6].every(i => {
       const v = respuestas[`${dim}_${i}`]
       return v !== undefined && v !== 0
     })
@@ -268,6 +268,7 @@ export default function Cuestionario({ version, demo = false }) {
         <DatosClasificacion
           version={version}
           empresaDatos={empresa}
+          demo={demo}
           onComplete={async (datos) => {
             // Para Dirección: comprobar deduplicidad por email antes de continuar
             if (version === 'D' && datos.email_directivo && !demo) {
@@ -383,7 +384,7 @@ export default function Cuestionario({ version, demo = false }) {
           <button
             className="btn btn-primario"
             onClick={handleEnviar}
-            disabled={(version === 'D' && !disponibilidad) || enviando}
+            disabled={(!demo && version === 'D' && !disponibilidad) || enviando}
             style={{ background: ((version === 'D' && !disponibilidad) || enviando) ? '#d1d9e6' : '#1a7a4a' }}
           >
             {enviando ? 'Enviando...' : '✓ Enviar respuestas'}
@@ -497,13 +498,13 @@ export default function Cuestionario({ version, demo = false }) {
           <button
             className="btn btn-primario"
             onClick={() => setPaso(p => p + 1)}
-            disabled={!dimensionCompleta(dim)}
+            disabled={!demo && !dimensionCompleta(dim)}
           >
             {esUltima ? 'Finalizar →' : 'Siguiente →'}
           </button>
         </div>
 
-        {!dimensionCompleta(dim) && (
+        {!demo && !dimensionCompleta(dim) && (
           <p style={{ fontSize: '0.78rem', color: '#555e7a', marginTop: 10, textAlign: 'center' }}>
             Valore todas las afirmaciones de esta sección para continuar
             {version !== 'D' && ' (puede usar NS/NC si no dispone de información suficiente)'}.

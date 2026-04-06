@@ -64,7 +64,7 @@ function Select({ value, onChange, options, placeholder }) {
   )
 }
 
-export default function DatosClasificacion({ version, empresaDatos, onComplete }) {
+export default function DatosClasificacion({ version, empresaDatos, onComplete, demo = false }) {
   const needsEmpresaData = version === 'D' && !empresaDatos?.sector
 
   const [nombreEmpresa, setNombreEmpresa] = useState('')
@@ -224,12 +224,12 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete }
         <button
           className="btn btn-primario"
           onClick={handleContinuar}
-          disabled={!isValid()}
+          disabled={!demo && !isValid()}
         >
           Continuar →
         </button>
       </div>
-      {!isValid() && (
+      {!demo && !isValid() && (
         <p style={{ fontSize: '0.78rem', color: '#888', marginTop: 8, textAlign: 'center' }}>
           Complete todos los campos obligatorios para continuar.
         </p>
