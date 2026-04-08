@@ -36,6 +36,17 @@ function extraerDominio(email) {
   return parts.length === 2 ? parts[1] : null
 }
 
+
+// Calcula el estrato según el número de empleados
+const calcEstrato = (empleados) => {
+  const n = parseInt(empleados, 10)
+  if (!n || isNaN(n)) return null
+  if (n <= 9)   return 'A'
+  if (n <= 49)  return null  // B1/B2 se determina en Admin según mando intermedio
+  if (n <= 249) return 'C'
+  return null
+}
+
 export default function Cuestionario({ version, demo = false }) {
   const { codigo } = useParams()
   const navigate   = useNavigate()
@@ -132,6 +143,9 @@ export default function Cuestionario({ version, demo = false }) {
     })
 
     // Campos comunes a todas las versiones
+    // Estrato: desde empresa ya cargada (disponible para D, MI y EO)
+    fila.estrato = empresa?.estrato || null
+
     fila.antiguedad_respondente    = clasificacion?.antiguedad_respondente || null
     fila.disponibilidad_ampliacion = version === 'D' ? disponibilidad : null
     // Para D: usa el email recogido en clasificación; para MI/EO: el del cierre
@@ -160,12 +174,14 @@ export default function Cuestionario({ version, demo = false }) {
 
     // ── Actualizar empresa con datos del directivo
     if (version === 'D' && clasificacion?.sector) {
+      const estratoCalculado = calcEstrato(clasificacion.empleados)
       await supabase.from('empresas').update({
         nombre:            clasificacion.nombre_empresa || null,
         sector:            clasificacion.sector,
         empleados:         clasificacion.empleados,
         antiguedad_empresa:clasificacion.antiguedad_empresa,
         empresa_familiar:  clasificacion.empresa_familiar,
+        estrato:           estratoCalculado,
       }).eq('codigo', codigo.toUpperCase())
     }
 
@@ -286,6 +302,14 @@ export default function Cuestionario({ version, demo = false }) {
                 setCheckingEmail(false)
                 if (dominioExistente && dominioExistente.length > 0) {
                   const codExistente = dominioExistente[0].empresa_codigo
+                  // Borrar el registro vacío creado en esta sesión
+                  // La condición .is('nombre', null) garantiza que solo se borra
+                  // si nunca llegó a completarse (nombre sigue siendo null)
+                  await supabase
+                    .from('empresas')
+                    .delete()
+                    .eq('codigo', codigo.toUpperCase())
+                    .is('nombre', null)
                   setDominioConflicto({ codigo: codExistente })
                   return
                 }
