@@ -39,6 +39,13 @@ const JORNADA = [
 const PERSONAS_CARGO = [
   '1 a 3 personas','4 a 9 personas','10 o más personas'
 ]
+const FORMALIZACION = [
+  'No existe ninguna formalización',
+  'Existe de forma muy informal',
+  'Parcialmente formalizada',
+  'Mayoritariamente formalizada',
+  'Totalmente formalizada y documentada',
+]
 
 function Campo({ label, children, required }) {
   return (
@@ -74,6 +81,7 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
   const [antiguedadEmpresa, setAntiguedadEmpresa] = useState('')
   const [familiar, setFamiliar] = useState('')
   const [sectorOtro, setSectorOtro] = useState('')
+  const [formalizacion, setFormalizacion] = useState('')
 
   const [antiguedadRespondente, setAntiguedadRespondente] = useState('')
   const [area, setArea] = useState('')
@@ -84,7 +92,7 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
 
   const isValid = () => {
     if (needsEmpresaData) {
-      if (!nombreEmpresa.trim() || !emailDirectivo.trim() || !sector || !empleados || !antiguedadEmpresa || !familiar) return false
+      if (!nombreEmpresa.trim() || !emailDirectivo.trim() || !sector || !empleados || !antiguedadEmpresa || !familiar || !formalizacion) return false
       if (sector === 'Otro' && !sectorOtro.trim()) return false
     }
     if (!antiguedadRespondente) return false
@@ -105,6 +113,7 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
       empleados,
       antiguedad_empresa: antiguedadEmpresa,
       empresa_familiar: familiar,
+      formalizacion_estrategia: formalizacion,
       antiguedad_respondente: antiguedadRespondente,
       area_funcional: area === 'Otro' ? areaOtro : area,
       tipo_contrato: contrato,
@@ -167,6 +176,13 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
 
           <Campo label="¿Es una empresa familiar?" required>
             <Select value={familiar} onChange={setFamiliar} options={FAMILIAR} />
+          </Campo>
+
+          <Campo label="¿En qué medida dispone su empresa de una estrategia formalizada y documentada?" required>
+            <Select value={formalizacion} onChange={setFormalizacion} options={FORMALIZACION} />
+            <div style={{ fontSize: '0.78rem', color: '#888', marginTop: 4 }}>
+              Considere estrategia formalizada aquella definida explícitamente, comunicada y registrada en documentos internos (plan estratégico, objetivos escritos, etc.).
+            </div>
           </Campo>
         </div>
       )}

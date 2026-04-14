@@ -1,5 +1,5 @@
 -- ============================================================
--- ESQUEMA COMPLETO BEV-PYMES  v2.0
+-- ESQUEMA COMPLETO BEV-PYMES  v2.1
 -- Borra todo y recrea desde cero con las 40 empresas
 -- Ejecuta todo de una vez en el SQL Editor de Supabase
 -- ============================================================
@@ -53,6 +53,8 @@ CREATE TABLE respuestas_dir (
   empleados          TEXT,
   antiguedad_empresa TEXT,
   empresa_familiar   TEXT,
+  -- Estrato calculado automáticamente desde número de empleados
+  estrato            TEXT,
   -- Datos individuales
   antiguedad_respondente    TEXT,
   disponibilidad_ampliacion TEXT,
@@ -74,6 +76,9 @@ CREATE TABLE respuestas_mi (
   d8_1 INT, d8_2 INT, d8_3 INT, d8_4 INT, d8_5 INT, d8_6 INT,
   d9_1 INT, d9_2 INT, d9_3 INT, d9_4 INT, d9_5 INT, d9_6 INT,
   d10_1 INT, d10_2 INT, d10_3 INT, d10_4 INT, d10_5 INT, d10_6 INT,
+  -- Estrato heredado de la empresa
+  estrato                   TEXT,
+  -- Datos individuales
   antiguedad_respondente    TEXT,
   area_funcional            TEXT,
   tipo_contrato             TEXT,
@@ -97,6 +102,9 @@ CREATE TABLE respuestas_eo (
   d8_1 INT, d8_2 INT, d8_3 INT, d8_4 INT, d8_5 INT, d8_6 INT,
   d9_1 INT, d9_2 INT, d9_3 INT, d9_4 INT, d9_5 INT, d9_6 INT,
   d10_1 INT, d10_2 INT, d10_3 INT, d10_4 INT, d10_5 INT, d10_6 INT,
+  -- Estrato heredado de la empresa
+  estrato                   TEXT,
+  -- Datos individuales
   antiguedad_respondente    TEXT,
   area_funcional            TEXT,
   tipo_contrato             TEXT,
@@ -107,7 +115,7 @@ CREATE TABLE respuestas_eo (
 );
 
 -- 6. POLÍTICAS RLS
-ALTER TABLE empresas      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE empresas       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE respuestas_dir ENABLE ROW LEVEL SECURITY;
 ALTER TABLE respuestas_mi  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE respuestas_eo  ENABLE ROW LEVEL SECURITY;
@@ -115,6 +123,7 @@ ALTER TABLE respuestas_eo  ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "leer empresas publico"   ON empresas      FOR SELECT USING (true);
 CREATE POLICY "insertar empresas"       ON empresas      FOR INSERT WITH CHECK (true);
 CREATE POLICY "actualizar empresas"     ON empresas      FOR UPDATE USING (true);
+CREATE POLICY "eliminar empresas"       ON empresas      FOR DELETE USING (true);
 CREATE POLICY "insertar respuestas dir" ON respuestas_dir FOR INSERT WITH CHECK (true);
 CREATE POLICY "insertar respuestas mi"  ON respuestas_mi  FOR INSERT WITH CHECK (true);
 CREATE POLICY "insertar respuestas eo"  ON respuestas_eo  FOR INSERT WITH CHECK (true);
@@ -128,10 +137,18 @@ CREATE POLICY "leer respuestas eo"      ON respuestas_eo  FOR SELECT USING (true
 -- No se precargan códigos. La tabla empresas comienza vacía.
 
 -- ============================================================
--- NOTA: Si ya tienes tablas creadas en producción y solo
--- necesitas actualizar el CHECK de estrato, ejecuta SOLO esto:
+-- NOTA: Si ya tienes tablas en producción con datos y solo
+-- necesitas añadir las columnas nuevas sin perder datos, ejecuta
+-- ÚNICAMENTE estos ALTER TABLE:
 --
+-- ALTER TABLE respuestas_dir ADD COLUMN IF NOT EXISTS estrato TEXT;
+-- ALTER TABLE respuestas_mi  ADD COLUMN IF NOT EXISTS estrato TEXT;
+-- ALTER TABLE respuestas_eo  ADD COLUMN IF NOT EXISTS estrato TEXT;
+-- ALTER TABLE empresas ADD COLUMN IF NOT EXISTS estrato TEXT
+--   CHECK (estrato IN ('A','B1','B2','C'));
 -- ALTER TABLE empresas DROP CONSTRAINT IF EXISTS empresas_estrato_check;
 -- ALTER TABLE empresas ADD CONSTRAINT empresas_estrato_check
 --   CHECK (estrato IN ('A','B1','B2','C'));
+-- -- Política DELETE para borrar registros vacíos en caso de duplicidad:
+-- CREATE POLICY "eliminar empresas" ON empresas FOR DELETE USING (true);
 -- ============================================================
