@@ -338,7 +338,7 @@ export default function Cuestionario({ version, demo = false }) {
         </div>
         <div className="dimension-titulo" style={{ marginBottom: 16 }}>Para terminar</div>
 
-        {/* ── Versión Dirección: agradecimiento + herramienta + disponibilidad ── */}
+        {/* ── Versión Dirección: agradecimiento + herramienta ── */}
         {version === 'D' && (
           <p style={{ color: '#374151', marginBottom: 20, fontSize: '0.92rem' }}>
             Muchas gracias por su tiempo y por liderar la participación de su empresa
@@ -352,13 +352,15 @@ export default function Cuestionario({ version, demo = false }) {
               background: '#f0fdf4', border: '1.5px solid #22c55e',
               borderRadius: 10, padding: '14px 18px', marginBottom: 20, fontSize: '0.88rem', color: '#374151'
             }}>
-              <strong style={{ color: '#15803d' }}>🎯 Acceso gratuito a la futura herramienta de alineamiento</strong>
+              <strong style={{ color: '#15803d' }}>🎯 Su participación le da acceso prioritario a la futura herramienta</strong>
               <p style={{ marginTop: 6, marginBottom: 0 }}>
-                El desarrollo de una herramienta de diagnóstico continuo de alineamiento estratégico
-                —similar a las evaluaciones de desempeño, pero orientada a la estrategia interna—
-                requiere la participación de un número amplio de empresas en futuras ampliaciones.
-                Las empresas que colaboren tendrán <strong>acceso permanente y sin coste</strong> a
-                esa herramienta para uso interno.
+                Este estudio forma parte de un proyecto de investigación cuyo objetivo final es
+                desarrollar una herramienta de diagnóstico del alineamiento estratégico interno
+                para PYMEs —similar a las evaluaciones de desempeño, pero orientada a la cohesión
+                estratégica del conjunto de la organización—. Como reconocimiento a su colaboración,
+                su empresa tendrá <strong>acceso prioritario y sin coste</strong> a las futuras
+                aplicaciones del instrumento desarrolladas en el marco de esta investigación.
+                Le informaremos en el email facilitado al inicio cuando estén disponibles.
               </p>
             </div>
 
@@ -369,8 +371,7 @@ export default function Cuestionario({ version, demo = false }) {
               </label>
               {[
                 'Sí, con mucho gusto',
-                'Posiblemente',
-                'No, prefiero no participar en más fases'
+                'No, prefiero no participar en más fases',
               ].map(op => (
                 <label key={op} style={{
                   display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px',
@@ -386,16 +387,13 @@ export default function Cuestionario({ version, demo = false }) {
               ))}
             </div>
 
-          <p style={{ fontSize: '0.78rem', color: '#6b7280', marginTop: 8,
-                      padding: '8px 12px', background: '#f9fafb',
-                      borderRadius: 6, borderLeft: '3px solid #d1d9e6' }}>
-            Si decide participar en futuras ampliaciones, le mantendremos informado/a
-            en el email facilitado al inicio de este cuestionario. Dicho email se
-            utilizará exclusivamente para comunicaciones relacionadas con este estudio
-            y sus ampliaciones, sin que sea cedido a terceros ni empleado con fines
-            publicitarios o comerciales, de conformidad con el Reglamento General de
-            Protección de Datos (RGPD, UE 2016/679).
-          </p>
+            <p style={{ fontSize: '0.78rem', color: '#6b7280', marginTop: 8,
+                        padding: '8px 12px', background: '#f9fafb',
+                        borderRadius: 6, borderLeft: '3px solid #d1d9e6' }}>
+              El email facilitado al inicio se utilizará exclusivamente para comunicaciones
+              relacionadas con este estudio, sin que sea cedido a terceros ni empleado con
+              fines publicitarios o comerciales, de conformidad con el RGPD (UE 2016/679).
+            </p>
           </>
         )}
 
