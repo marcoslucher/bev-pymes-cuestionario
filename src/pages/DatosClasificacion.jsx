@@ -98,10 +98,11 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
 
   const isValid = () => {
     if (needsEmpresaData) {
-      if (!nombreEmpresa.trim() || !emailDirectivo.trim() || !sector || !empleados || !antiguedadEmpresa || !familiar || !rolDirectivo || !formalizacion) return false
+      if (!nombreEmpresa.trim() || !emailDirectivo.trim() || !sector || !empleados || !antiguedadEmpresa || !familiar || !formalizacion) return false
       if (sector === 'Otro' && !sectorOtro.trim()) return false
     }
     if (!antiguedadRespondente) return false
+    if (version === 'D' && !rolDirectivo) return false
     if (version !== 'D') {
       if (!area || !contrato) return false
       if (area === 'Otro' && !areaOtro.trim()) return false
@@ -185,10 +186,6 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
             <Select value={familiar} onChange={setFamiliar} options={FAMILIAR} />
           </Campo>
 
-          <Campo label="Rol en la empresa" required>
-            <Select value={rolDirectivo} onChange={setRolDirectivo} options={ROL_DIRECTIVO} />
-          </Campo>
-
           <Campo label="¿En qué medida dispone su empresa de una estrategia formalizada y documentada?" required>
             <Select value={formalizacion} onChange={setFormalizacion} options={FORMALIZACION} />
             <div style={{ fontSize: '0.78rem', color: '#888', marginTop: 4 }}>
@@ -214,6 +211,12 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
         <Campo label="Antigüedad en esta empresa" required>
           <Select value={antiguedadRespondente} onChange={setAntiguedadRespondente} options={ANTIGUEDAD_RESPONDENTE} />
         </Campo>
+
+        {version === 'D' && (
+          <Campo label="Rol en la empresa" required>
+            <Select value={rolDirectivo} onChange={setRolDirectivo} options={ROL_DIRECTIVO} />
+          </Campo>
+        )}
 
         {version === 'MI' && (
           <div style={{
