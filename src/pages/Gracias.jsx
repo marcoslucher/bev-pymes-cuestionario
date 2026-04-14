@@ -115,20 +115,23 @@ export default function Gracias() {
                 marginBottom: 24,
               }}>
                 <div style={{ fontWeight: 700, fontSize: '1rem', color: '#15803d', marginBottom: 10 }}>
-                  🎯 Acceso gratuito a la futura herramienta de alineamiento estratégico
+                  🎯 Su participación le da acceso prioritario a la futura herramienta
                 </div>
                 <p style={{ fontSize: '0.88rem', color: '#374151', marginBottom: 10 }}>
-                  El desarrollo de una <strong>herramienta de diagnóstico continuo de
-                  alineamiento estratégico</strong> para PYMEs —similar a las evaluaciones
-                  de desempeño, pero orientada a la estrategia interna— requiere datos de un
-                  número amplio de empresas para que los resultados sean robustos y fiables.
+                  Este estudio forma parte de un proyecto de investigación cuyo objetivo final es
+                  desarrollar una <strong>herramienta de diagnóstico del alineamiento estratégico
+                  interno</strong> para PYMEs: una aplicación que permita a cualquier empresa medir,
+                  de forma periódica y sencilla, en qué medida su equipo comparte y asume la
+                  estrategia definida por la dirección —de manera similar a como las evaluaciones
+                  de desempeño miden el rendimiento individual, pero orientada a la cohesión
+                  estratégica del conjunto de la organización.
                 </p>
                 <p style={{ fontSize: '0.88rem', color: '#374151', marginBottom: 0 }}>
-                  Si su empresa participa en las <strong>futuras ampliaciones del estudio</strong>,
-                  contribuirá directamente a hacer posible esa herramienta y, como reconocimiento,
-                  tendrá <strong>acceso permanente y sin coste</strong> a ella para uso interno.
-                  Si desea ser informado/a, indíquenoslo respondiendo a este correo o
-                  facilitando su email de contacto al completar el cuestionario.
+                  Como reconocimiento a su colaboración, su empresa tendrá{' '}
+                  <strong>acceso prioritario y sin coste</strong> a las futuras aplicaciones
+                  del instrumento de diagnóstico desarrolladas en el marco de esta investigación.
+                  Si facilitó su email al completar el cuestionario, le informaremos directamente
+                  cuando estén disponibles.
                 </p>
               </div>
             )}
