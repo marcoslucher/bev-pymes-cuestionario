@@ -21,6 +21,18 @@ const FAMILIAR = [
   'No',
   'No lo sé'
 ]
+const ROL_DIRECTIVO = [
+  'Propietario-fundador',
+  'Socio directivo',
+  'Gerente contratado',
+]
+const FORMALIZACION = [
+  'No existe ninguna formalización',
+  'Existe de forma muy informal',
+  'Parcialmente formalizada',
+  'Mayoritariamente formalizada',
+  'Totalmente formalizada y documentada',
+]
 const ANTIGUEDAD_RESPONDENTE = [
   'Menos de 1 año','1 a 3 años','3 a 5 años','5 a 10 años','Más de 10 años'
 ]
@@ -38,13 +50,6 @@ const JORNADA = [
 ]
 const PERSONAS_CARGO = [
   '1 a 3 personas','4 a 9 personas','10 o más personas'
-]
-const FORMALIZACION = [
-  'No existe ninguna formalización',
-  'Existe de forma muy informal',
-  'Parcialmente formalizada',
-  'Mayoritariamente formalizada',
-  'Totalmente formalizada y documentada',
 ]
 
 function Campo({ label, children, required }) {
@@ -81,6 +86,7 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
   const [antiguedadEmpresa, setAntiguedadEmpresa] = useState('')
   const [familiar, setFamiliar] = useState('')
   const [sectorOtro, setSectorOtro] = useState('')
+  const [rolDirectivo, setRolDirectivo] = useState('')
   const [formalizacion, setFormalizacion] = useState('')
 
   const [antiguedadRespondente, setAntiguedadRespondente] = useState('')
@@ -92,7 +98,7 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
 
   const isValid = () => {
     if (needsEmpresaData) {
-      if (!nombreEmpresa.trim() || !emailDirectivo.trim() || !sector || !empleados || !antiguedadEmpresa || !familiar || !formalizacion) return false
+      if (!nombreEmpresa.trim() || !emailDirectivo.trim() || !sector || !empleados || !antiguedadEmpresa || !familiar || !rolDirectivo || !formalizacion) return false
       if (sector === 'Otro' && !sectorOtro.trim()) return false
     }
     if (!antiguedadRespondente) return false
@@ -113,6 +119,7 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
       empleados,
       antiguedad_empresa: antiguedadEmpresa,
       empresa_familiar: familiar,
+      rol_directivo: rolDirectivo,
       formalizacion_estrategia: formalizacion,
       antiguedad_respondente: antiguedadRespondente,
       area_funcional: area === 'Otro' ? areaOtro : area,
@@ -176,6 +183,10 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
 
           <Campo label="¿Es una empresa familiar?" required>
             <Select value={familiar} onChange={setFamiliar} options={FAMILIAR} />
+          </Campo>
+
+          <Campo label="Rol en la empresa" required>
+            <Select value={rolDirectivo} onChange={setRolDirectivo} options={ROL_DIRECTIVO} />
           </Campo>
 
           <Campo label="¿En qué medida dispone su empresa de una estrategia formalizada y documentada?" required>
