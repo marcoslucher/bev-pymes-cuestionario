@@ -22,9 +22,8 @@ const FAMILIAR = [
   'No lo sé'
 ]
 const ROL_DIRECTIVO = [
-  'Propietario-fundador',
-  'Socio directivo',
-  'Gerente contratado',
+  'Propietario / Socio con funciones directivas',
+  'Gerente contratado (sin participación en la propiedad)',
 ]
 const FORMALIZACION = [
   'No existe ninguna formalización',
