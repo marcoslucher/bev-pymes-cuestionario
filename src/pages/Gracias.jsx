@@ -104,38 +104,6 @@ export default function Gracias() {
               </div>
             )}
 
-            {/* Bloque beneficio herramienta — solo Dirección */}
-            {!demo && version === 'D' && (
-              <div style={{
-                background: '#f0fdf4',
-                border: '1.5px solid #22c55e',
-                borderRadius: 12,
-                padding: '20px 24px',
-                textAlign: 'left',
-                marginBottom: 24,
-              }}>
-                <div style={{ fontWeight: 700, fontSize: '1rem', color: '#15803d', marginBottom: 10 }}>
-                  🎯 Su participación le da acceso prioritario a la futura herramienta
-                </div>
-                <p style={{ fontSize: '0.88rem', color: '#374151', marginBottom: 10 }}>
-                  Este estudio forma parte de un proyecto de investigación cuyo objetivo final es
-                  desarrollar una <strong>herramienta de diagnóstico del alineamiento estratégico
-                  interno</strong> para PYMEs: una aplicación que permita a cualquier empresa medir,
-                  de forma periódica y sencilla, en qué medida su equipo comparte y asume la
-                  estrategia definida por la dirección —de manera similar a como las evaluaciones
-                  de desempeño miden el rendimiento individual, pero orientada a la cohesión
-                  estratégica del conjunto de la organización.
-                </p>
-                <p style={{ fontSize: '0.88rem', color: '#374151', marginBottom: 0 }}>
-                  Como reconocimiento a su colaboración, su empresa tendrá{' '}
-                  <strong>acceso prioritario y sin coste</strong> a las futuras aplicaciones
-                  del instrumento de diagnóstico desarrolladas en el marco de esta investigación.
-                  Si facilitó su email al completar el cuestionario, le informaremos directamente
-                  cuando estén disponibles.
-                </p>
-              </div>
-            )}
-
             <p style={{ marginTop: 8, fontSize: '0.82rem', color: '#9ca3af' }}>
               Puede cerrar esta ventana.
             </p>
