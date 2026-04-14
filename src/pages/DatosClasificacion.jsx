@@ -22,8 +22,9 @@ const FAMILIAR = [
   'No lo sé'
 ]
 const ROL_DIRECTIVO = [
-  'Propietario / Socio con funciones directivas',
-  'Gerente contratado (sin participación en la propiedad)',
+  'Propietario-fundador',
+  'Socio directivo',
+  'Gerente contratado',
 ]
 const FORMALIZACION = [
   'No existe ninguna formalización',
@@ -78,6 +79,9 @@ function Select({ value, onChange, options, placeholder }) {
 export default function DatosClasificacion({ version, empresaDatos, onComplete, demo = false }) {
   const needsEmpresaData = version === 'D' && !empresaDatos?.sector
 
+  // Regex de validación de email (formato básico x@x.x)
+  const emailValido = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+
   const [nombreEmpresa, setNombreEmpresa] = useState('')
   const [emailDirectivo, setEmailDirectivo] = useState('')
   const [sector, setSector] = useState('')
@@ -97,11 +101,10 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
 
   const isValid = () => {
     if (needsEmpresaData) {
-      if (!nombreEmpresa.trim() || !emailDirectivo.trim() || !sector || !empleados || !antiguedadEmpresa || !familiar || !formalizacion) return false
+      if (!nombreEmpresa.trim() || !emailDirectivo.trim() || !emailValido(emailDirectivo) || !sector || !empleados || !antiguedadEmpresa || !familiar || !rolDirectivo || !formalizacion) return false
       if (sector === 'Otro' && !sectorOtro.trim()) return false
     }
     if (!antiguedadRespondente) return false
-    if (version === 'D' && !rolDirectivo) return false
     if (version !== 'D') {
       if (!area || !contrato) return false
       if (area === 'Otro' && !areaOtro.trim()) return false
@@ -157,6 +160,11 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
               value={emailDirectivo}
               onChange={e => setEmailDirectivo(e.target.value)}
             />
+            {emailDirectivo && !emailValido(emailDirectivo) && (
+              <div style={{ fontSize: '0.78rem', color: '#e53e3e', marginTop: 4 }}>
+                Introduzca un email válido (ejemplo: nombre@empresa.com).
+              </div>
+            )}
             <div style={{ fontSize: '0.78rem', color: '#888', marginTop: 4 }}>
               Se utiliza para evitar duplicidades y para enviarle el informe de resultados.
             </div>
@@ -185,6 +193,10 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
             <Select value={familiar} onChange={setFamiliar} options={FAMILIAR} />
           </Campo>
 
+          <Campo label="Rol en la empresa" required>
+            <Select value={rolDirectivo} onChange={setRolDirectivo} options={ROL_DIRECTIVO} />
+          </Campo>
+
           <Campo label="¿En qué medida dispone su empresa de una estrategia formalizada y documentada?" required>
             <Select value={formalizacion} onChange={setFormalizacion} options={FORMALIZACION} />
             <div style={{ fontSize: '0.78rem', color: '#888', marginTop: 4 }}>
@@ -206,12 +218,6 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
       <div>
         <div className="dimension-titulo" style={{ marginBottom: 4 }}>Sus datos</div>
         <div className="dimension-instruccion">Datos individuales del respondente.</div>
-
-        {version === 'D' && (
-          <Campo label="Rol en la empresa" required>
-            <Select value={rolDirectivo} onChange={setRolDirectivo} options={ROL_DIRECTIVO} />
-          </Campo>
-        )}
 
         <Campo label="Antigüedad en esta empresa" required>
           <Select value={antiguedadRespondente} onChange={setAntiguedadRespondente} options={ANTIGUEDAD_RESPONDENTE} />
