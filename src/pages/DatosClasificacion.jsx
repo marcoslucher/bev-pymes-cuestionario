@@ -208,15 +208,15 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
         <div className="dimension-titulo" style={{ marginBottom: 4 }}>Sus datos</div>
         <div className="dimension-instruccion">Datos individuales del respondente.</div>
 
-        <Campo label="Antigüedad en esta empresa" required>
-          <Select value={antiguedadRespondente} onChange={setAntiguedadRespondente} options={ANTIGUEDAD_RESPONDENTE} />
-        </Campo>
-
         {version === 'D' && (
           <Campo label="Rol en la empresa" required>
             <Select value={rolDirectivo} onChange={setRolDirectivo} options={ROL_DIRECTIVO} />
           </Campo>
         )}
+
+        <Campo label="Antigüedad en esta empresa" required>
+          <Select value={antiguedadRespondente} onChange={setAntiguedadRespondente} options={ANTIGUEDAD_RESPONDENTE} />
+        </Campo>
 
         {version === 'MI' && (
           <div style={{
