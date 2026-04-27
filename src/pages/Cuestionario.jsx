@@ -164,10 +164,12 @@ export default function Cuestionario({ version, demo = false }) {
 
     // Campos específicos por versión
     if (version === 'D') {
-      fila.sector            = clasificacion?.sector            || null
-      fila.empleados         = clasificacion?.empleados         || null
-      fila.antiguedad_empresa= clasificacion?.antiguedad_empresa|| null
-      fila.empresa_familiar  = clasificacion?.empresa_familiar  || null
+      fila.sector                   = clasificacion?.sector                   || null
+      fila.empleados                = clasificacion?.empleados                || null
+      fila.antiguedad_empresa       = clasificacion?.antiguedad_empresa       || null
+      fila.empresa_familiar         = clasificacion?.empresa_familiar         || null
+      fila.rol_directivo            = clasificacion?.rol_directivo            || null
+      fila.formalizacion_estrategia = clasificacion?.formalizacion_estrategia || null
     }
     if (version === 'MI') {
       fila.area_funcional  = clasificacion?.area_funcional || null
@@ -183,12 +185,14 @@ export default function Cuestionario({ version, demo = false }) {
     // ── Actualizar empresa con datos del directivo
     if (version === 'D' && clasificacion?.sector) {
       await supabase.from('empresas').update({
-        nombre:            clasificacion.nombre_empresa || null,
-        sector:            clasificacion.sector,
-        empleados:         clasificacion.empleados,
-        antiguedad_empresa:clasificacion.antiguedad_empresa,
-        empresa_familiar:  clasificacion.empresa_familiar,
-        estrato:           estratoFila,
+        nombre:                   clasificacion.nombre_empresa || null,
+        sector:                   clasificacion.sector,
+        empleados:                clasificacion.empleados,
+        antiguedad_empresa:       clasificacion.antiguedad_empresa,
+        empresa_familiar:         clasificacion.empresa_familiar,
+        rol_directivo:            clasificacion.rol_directivo            || null,
+        formalizacion_estrategia: clasificacion.formalizacion_estrategia || null,
+        estrato:                  estratoFila,
       }).eq('codigo', codigo.toUpperCase())
     }
 
