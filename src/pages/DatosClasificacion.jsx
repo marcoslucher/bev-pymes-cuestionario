@@ -263,7 +263,7 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
               </div>
             )}
             <div style={{ fontSize: '0.78rem', color: '#888', marginTop: 4 }}>
-              Si desea recibir copia del informe de resultados directamente, indique su email. En caso contrario, el primer directivo de su empresa lo recibirá y podrá compartirlo internamente.
+              Si desea recibir copia del informe de resultados directamente, indique su email. En caso contrario, el primer directivo de su empresa que cumplimentó el cuestionario lo recibirá y podrá compartirlo internamente.
             </div>
           </Campo>
         )}
