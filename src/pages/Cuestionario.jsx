@@ -69,6 +69,13 @@ export default function Cuestionario({ version, demo = false }) {
   const [checkingEmail,   setCheckingEmail]   = useState(false)
   const [dominioConflicto, setDominioConflicto] = useState(null)  // {codigo} si dominio ya registrado
   const [copiado,          setCopiado]          = useState(false)
+  // Indica si ya existe una respuesta de Dirección previa para esta empresa.
+  // Cuando es true, este directivo es un "segundo directivo" y se omiten:
+  //   - datos de empresa en clasificación (heredados del primero)
+  //   - pregunta de disponibilidad
+  //   - cuadro verde de acceso prioritario
+  //   - update de la tabla empresas
+  const [esSegundoDirectivo, setEsSegundoDirectivo] = useState(false)
 
   useEffect(() => {
     if (demo) {
@@ -84,6 +91,15 @@ export default function Cuestionario({ version, demo = false }) {
         .single()
       if (error || !data) { navigate('/'); return }
       setEmpresa(data)
+      // Si es versión D, comprobar si ya existe una respuesta de Dirección previa
+      if (version === 'D') {
+        const { data: previo } = await supabase
+          .from('respuestas_dir')
+          .select('id')
+          .eq('empresa_codigo', codigo.toUpperCase())
+          .limit(1)
+        if (previo && previo.length > 0) setEsSegundoDirectivo(true)
+      }
       setCargando(false)
     }
     verificar()
@@ -110,7 +126,7 @@ export default function Cuestionario({ version, demo = false }) {
     })
 
   const handleEnviar = async () => {
-    if (version === 'D' && !disponibilidad) { setErrorEnvio('Por favor, responda la pregunta final antes de enviar.'); return }
+    if (version === 'D' && !esSegundoDirectivo && !disponibilidad) { setErrorEnvio('Por favor, responda la pregunta final antes de enviar.'); return }
     if (demo) {
       navigate('/gracias', { state: { version, empresa: empresa.nombre, demo: true } })
       return
@@ -119,21 +135,9 @@ export default function Cuestionario({ version, demo = false }) {
     setEnviando(true)
     setErrorEnvio('')
 
-    // Deduplicidad por email ya comprobada al inicio en paso 0
-
-    // ── Deduplicidad por código de empresa (versión D)
-    if (version === 'D') {
-      const { data: existente } = await supabase
-        .from('respuestas_dir')
-        .select('id')
-        .eq('empresa_codigo', codigo.toUpperCase())
-        .limit(1)
-      if (existente && existente.length > 0) {
-        setErrorEnvio('Ya existe una respuesta de Dirección registrada para esta empresa. Si cree que es un error, contacte con el investigador.')
-        setEnviando(false)
-        return
-      }
-    }
+    // Nota: se admiten múltiples respuestas de Dirección por empresa
+    // (segundos directivos, miembros del comité directivo, etc.).
+    // Los datos de empresa se heredan del primer directivo.
 
     // ── Construir fila de respuestas según versión (solo columnas que existen en cada tabla)
     const fila = { empresa_codigo: codigo.toUpperCase() }
@@ -155,7 +159,7 @@ export default function Cuestionario({ version, demo = false }) {
     fila.estrato = estratoFila
 
     fila.antiguedad_respondente    = clasificacion?.antiguedad_respondente || null
-    fila.disponibilidad_ampliacion = version === 'D' ? disponibilidad : null
+    fila.disponibilidad_ampliacion = (version === 'D' && !esSegundoDirectivo) ? disponibilidad : null
     // Para D: usa el email recogido en clasificación; para MI/EO: el del cierre
     // Email de contacto: solo para dirección (recogido en clasificación)
     fila.email_contacto = version === 'D'
@@ -164,10 +168,12 @@ export default function Cuestionario({ version, demo = false }) {
 
     // Campos específicos por versión
     if (version === 'D') {
-      fila.sector                   = clasificacion?.sector                   || null
-      fila.empleados                = clasificacion?.empleados                || null
-      fila.antiguedad_empresa       = clasificacion?.antiguedad_empresa       || null
-      fila.empresa_familiar         = clasificacion?.empresa_familiar         || null
+      // Para el segundo directivo, los datos de empresa se heredan de la fila ya creada;
+      // para el primero, vienen del formulario de clasificación.
+      fila.sector                   = esSegundoDirectivo ? (empresa?.sector             || null) : (clasificacion?.sector                   || null)
+      fila.empleados                = esSegundoDirectivo ? (empresa?.empleados          || null) : (clasificacion?.empleados                || null)
+      fila.antiguedad_empresa       = esSegundoDirectivo ? (empresa?.antiguedad_empresa || null) : (clasificacion?.antiguedad_empresa       || null)
+      fila.empresa_familiar         = esSegundoDirectivo ? (empresa?.empresa_familiar   || null) : (clasificacion?.empresa_familiar         || null)
       fila.rol_directivo            = clasificacion?.rol_directivo            || null
       fila.formalizacion_estrategia = clasificacion?.formalizacion_estrategia || null
     }
@@ -182,17 +188,15 @@ export default function Cuestionario({ version, demo = false }) {
       fila.jornada         = clasificacion?.jornada        || null
     }
 
-    // ── Actualizar empresa con datos del directivo
-    if (version === 'D' && clasificacion?.sector) {
+    // ── Actualizar empresa con datos del directivo (solo el primer directivo)
+    if (version === 'D' && !esSegundoDirectivo && clasificacion?.sector) {
       await supabase.from('empresas').update({
-        nombre:                   clasificacion.nombre_empresa || null,
-        sector:                   clasificacion.sector,
-        empleados:                clasificacion.empleados,
-        antiguedad_empresa:       clasificacion.antiguedad_empresa,
-        empresa_familiar:         clasificacion.empresa_familiar,
-        rol_directivo:            clasificacion.rol_directivo            || null,
-        formalizacion_estrategia: clasificacion.formalizacion_estrategia || null,
-        estrato:                  estratoFila,
+        nombre:            clasificacion.nombre_empresa || null,
+        sector:            clasificacion.sector,
+        empleados:         clasificacion.empleados,
+        antiguedad_empresa:clasificacion.antiguedad_empresa,
+        empresa_familiar:  clasificacion.empresa_familiar,
+        estrato:           estratoFila,
       }).eq('codigo', codigo.toUpperCase())
     }
 
@@ -350,14 +354,21 @@ export default function Cuestionario({ version, demo = false }) {
         <div className="dimension-titulo" style={{ marginBottom: 16 }}>Para terminar</div>
 
         {/* ── Versión Dirección: agradecimiento + herramienta ── */}
-        {version === 'D' && (
+        {version === 'D' && !esSegundoDirectivo && (
           <p style={{ color: '#374151', marginBottom: 20, fontSize: '0.92rem' }}>
             Muchas gracias por su tiempo y por liderar la participación de su empresa
             en este estudio. Su contribución es fundamental para mejorar el conocimiento
             sobre el alineamiento estratégico en las PYMEs españolas.
           </p>
         )}
-        {version === 'D' && (
+        {version === 'D' && esSegundoDirectivo && (
+          <p style={{ color: '#374151', marginBottom: 20, fontSize: '0.92rem' }}>
+            Muchas gracias por su tiempo y por contribuir, junto con el resto del equipo
+            directivo de su empresa, al estudio sobre alineamiento estratégico en las PYMEs
+            españolas. Puede enviar sus respuestas a continuación.
+          </p>
+        )}
+        {version === 'D' && !esSegundoDirectivo && (
           <>
             <div style={{
               background: '#f0fdf4', border: '1.5px solid #22c55e',
@@ -428,8 +439,8 @@ export default function Cuestionario({ version, demo = false }) {
           <button
             className="btn btn-primario"
             onClick={handleEnviar}
-            disabled={(!demo && version === 'D' && !disponibilidad) || enviando}
-            style={{ background: ((version === 'D' && !disponibilidad) || enviando) ? '#d1d9e6' : '#1a7a4a' }}
+            disabled={(!demo && version === 'D' && !esSegundoDirectivo && !disponibilidad) || enviando}
+            style={{ background: ((version === 'D' && !esSegundoDirectivo && !disponibilidad) || enviando) ? '#d1d9e6' : '#1a7a4a' }}
           >
             {enviando ? 'Enviando...' : '✓ Enviar respuestas'}
           </button>
