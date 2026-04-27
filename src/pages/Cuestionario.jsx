@@ -148,8 +148,11 @@ export default function Cuestionario({ version, demo = false }) {
     })
 
     // Campos comunes a todas las versiones
-    // Estrato: desde empresa ya cargada (disponible para D, MI y EO)
-    fila.estrato = empresa?.estrato || null
+    // Estrato: para D se calcula con datos recién recogidos; para MI/EO viene de empresa
+    const estratoFila = version === 'D'
+      ? calcEstrato(clasificacion?.empleados, clasificacion?.tiene_mi)
+      : (empresa?.estrato || null)
+    fila.estrato = estratoFila
 
     fila.antiguedad_respondente    = clasificacion?.antiguedad_respondente || null
     fila.disponibilidad_ampliacion = version === 'D' ? disponibilidad : null
@@ -179,14 +182,13 @@ export default function Cuestionario({ version, demo = false }) {
 
     // ── Actualizar empresa con datos del directivo
     if (version === 'D' && clasificacion?.sector) {
-      const estratoCalculado = calcEstrato(clasificacion.empleados, clasificacion.tiene_mi)
       await supabase.from('empresas').update({
         nombre:            clasificacion.nombre_empresa || null,
         sector:            clasificacion.sector,
         empleados:         clasificacion.empleados,
         antiguedad_empresa:clasificacion.antiguedad_empresa,
         empresa_familiar:  clasificacion.empresa_familiar,
-        estrato:           estratoCalculado,
+        estrato:           estratoFila,
       }).eq('codigo', codigo.toUpperCase())
     }
 
