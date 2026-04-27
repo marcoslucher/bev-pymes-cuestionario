@@ -301,8 +301,10 @@ export default function Cuestionario({ version, demo = false }) {
           empresaDatos={empresa}
           demo={demo}
           onComplete={async (datos) => {
-            // Para Dirección: comprobar deduplicidad por email antes de continuar
-            if (version === 'D' && datos.email_directivo && !demo) {
+            // Para Dirección: comprobar deduplicidad por email solo en el PRIMER directivo.
+            // Si ya hay un primer directivo en esta empresa (esSegundoDirectivo = true),
+            // el dominio coincidente con el primero es esperable, no conflictivo.
+            if (version === 'D' && !esSegundoDirectivo && datos.email_directivo && !demo) {
               const dominio = extraerDominio(datos.email_directivo)
               // Solo comprobar dominios corporativos (no gmail, hotmail, etc.)
               if (dominio && !DOMINIOS_GENERICOS.has(dominio)) {
