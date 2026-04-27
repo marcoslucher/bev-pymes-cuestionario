@@ -123,7 +123,7 @@ export default function Cuestionario({ version, demo = false }) {
     const verificar = async () => {
       const { data, error } = await supabase
         .from('empresas')
-        .select('codigo, nombre, estrato, sector, empleados, antiguedad_empresa, empresa_familiar')
+        .select('codigo, nombre, estrato, sector, empleados, antiguedad_empresa, empresa_familiar, formalizacion_estrategia')
         .eq('codigo', codigo.toUpperCase())
         .single()
       if (error || !data) { navigate('/'); return }
@@ -233,12 +233,14 @@ export default function Cuestionario({ version, demo = false }) {
     if (version === 'D') {
       // Para el segundo directivo, los datos de empresa se heredan de la fila ya creada;
       // para el primero, vienen del formulario de clasificación.
-      fila.sector                   = segundoDirectivoEfectivo ? (empresa?.sector             || null) : (clasificacion?.sector                   || null)
-      fila.empleados                = segundoDirectivoEfectivo ? (empresa?.empleados          || null) : (clasificacion?.empleados                || null)
-      fila.antiguedad_empresa       = segundoDirectivoEfectivo ? (empresa?.antiguedad_empresa || null) : (clasificacion?.antiguedad_empresa       || null)
-      fila.empresa_familiar         = segundoDirectivoEfectivo ? (empresa?.empresa_familiar   || null) : (clasificacion?.empresa_familiar         || null)
-      fila.rol_directivo            = clasificacion?.rol_directivo            || null
-      fila.formalizacion_estrategia = clasificacion?.formalizacion_estrategia || null
+      // rol_directivo es individual: cada directivo aporta el suyo.
+      // formalizacion_estrategia es atributo de empresa según el primer directivo: se hereda.
+      fila.sector                   = segundoDirectivoEfectivo ? (empresa?.sector                   || null) : (clasificacion?.sector                   || null)
+      fila.empleados                = segundoDirectivoEfectivo ? (empresa?.empleados                || null) : (clasificacion?.empleados                || null)
+      fila.antiguedad_empresa       = segundoDirectivoEfectivo ? (empresa?.antiguedad_empresa       || null) : (clasificacion?.antiguedad_empresa       || null)
+      fila.empresa_familiar         = segundoDirectivoEfectivo ? (empresa?.empresa_familiar         || null) : (clasificacion?.empresa_familiar         || null)
+      fila.formalizacion_estrategia = segundoDirectivoEfectivo ? (empresa?.formalizacion_estrategia || null) : (clasificacion?.formalizacion_estrategia || null)
+      fila.rol_directivo            = clasificacion?.rol_directivo || null
     }
     if (version === 'MI') {
       fila.area_funcional  = clasificacion?.area_funcional || null
