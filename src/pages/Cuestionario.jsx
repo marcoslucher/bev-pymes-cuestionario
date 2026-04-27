@@ -191,12 +191,14 @@ export default function Cuestionario({ version, demo = false }) {
     // ── Actualizar empresa con datos del directivo (solo el primer directivo)
     if (version === 'D' && !esSegundoDirectivo && clasificacion?.sector) {
       await supabase.from('empresas').update({
-        nombre:            clasificacion.nombre_empresa || null,
-        sector:            clasificacion.sector,
-        empleados:         clasificacion.empleados,
-        antiguedad_empresa:clasificacion.antiguedad_empresa,
-        empresa_familiar:  clasificacion.empresa_familiar,
-        estrato:           estratoFila,
+        nombre:                   clasificacion.nombre_empresa || null,
+        sector:                   clasificacion.sector,
+        empleados:                clasificacion.empleados,
+        antiguedad_empresa:       clasificacion.antiguedad_empresa,
+        empresa_familiar:         clasificacion.empresa_familiar,
+        rol_directivo:            clasificacion.rol_directivo            || null,
+        formalizacion_estrategia: clasificacion.formalizacion_estrategia || null,
+        estrato:                  estratoFila,
       }).eq('codigo', codigo.toUpperCase())
     }
 
