@@ -82,23 +82,19 @@ export default function App({ demo = false }) {
     setCreando(true)
     setError('')
 
+    // INSERT atómico con reintento si hay colisión de código UNIQUE.
+    // El UNIQUE constraint de la BD garantiza que dos directivos simultáneos
+    // no puedan crear la misma empresa, aunque el JS genere el mismo código
+    // por casualidad. Si ocurre colisión (código '23505'), reintentamos.
     let cod = ''
-    let intentos = 0
-    while (intentos < 10) {
+    let errInsert = null
+    for (let intento = 0; intento < 5; intento++) {
       cod = generarCodigo()
-      // Verificar que no exista ya
-      const { data } = await supabase
-        .from('empresas')
-        .select('codigo')
-        .eq('codigo', cod)
-        .maybeSingle()
-      if (!data) break   // código libre
-      intentos++
+      const { error } = await supabase.from('empresas').insert([{ codigo: cod }])
+      errInsert = error
+      if (!error) break
+      if (error.code !== '23505') break  // si no es colisión UNIQUE, no reintentar
     }
-
-    const { error: errInsert } = await supabase
-      .from('empresas')
-      .insert([{ codigo: cod }])
 
     setCreando(false)
 

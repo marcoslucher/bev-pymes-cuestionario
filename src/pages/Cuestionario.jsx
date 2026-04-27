@@ -28,7 +28,9 @@ const DOMINIOS_GENERICOS = new Set([
   'gmail.com','googlemail.com','hotmail.com','hotmail.es','outlook.com','outlook.es',
   'live.com','live.es','yahoo.com','yahoo.es','icloud.com','me.com','mac.com',
   'protonmail.com','proton.me','tutanota.com','aol.com','msn.com','terra.es',
-  'telefonica.net','orangemail.es','vodafone.es','ono.com'
+  'telefonica.net','orangemail.es','vodafone.es','vodafone.com','ono.com',
+  'movistar.es','movistar.com','ya.com','mixmail.com','latinmail.com','inbox.com',
+  'gmx.com','gmx.es','zoho.com','mail.com','fastmail.com','wanadoo.es',
 ])
 
 function extraerDominio(email) {
@@ -76,6 +78,41 @@ export default function Cuestionario({ version, demo = false }) {
   //   - cuadro verde de acceso prioritario
   //   - update de la tabla empresas
   const [esSegundoDirectivo, setEsSegundoDirectivo] = useState(false)
+
+  // Clave única de sessionStorage para esta sesión de cuestionario
+  // (cuestionario por código + versión, no se mezcla entre empresas o versiones)
+  const sessionKey = `bev_${codigo || 'demo'}_${version}`
+
+  // Restaurar estado al cargar la página (protege contra refrescos accidentales)
+  useEffect(() => {
+    if (demo) return
+    try {
+      const guardado = sessionStorage.getItem(sessionKey)
+      if (guardado) {
+        const estado = JSON.parse(guardado)
+        if (estado.respuestas)    setRespuestas(estado.respuestas)
+        if (estado.clasificacion) setClasificacion(estado.clasificacion)
+        if (estado.disponibilidad) setDisponibilidad(estado.disponibilidad)
+        if (typeof estado.paso === 'number') setPaso(estado.paso)
+      }
+    } catch (e) {
+      // Si el JSON está corrupto, ignoramos y empezamos limpio
+      console.warn('No se pudo restaurar el estado del cuestionario:', e)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Guardar estado en sessionStorage cada vez que cambia
+  useEffect(() => {
+    if (demo || cargando) return
+    try {
+      sessionStorage.setItem(sessionKey, JSON.stringify({
+        respuestas, clasificacion, disponibilidad, paso,
+      }))
+    } catch (e) {
+      // sessionStorage lleno o deshabilitado: no es crítico
+    }
+  }, [respuestas, clasificacion, disponibilidad, paso, sessionKey, demo, cargando])
 
   useEffect(() => {
     if (demo) {
@@ -135,6 +172,20 @@ export default function Cuestionario({ version, demo = false }) {
     setEnviando(true)
     setErrorEnvio('')
 
+    // Re-comprobar si ya hay otro directivo (puede haber enviado entre la carga
+    // y este momento; protege contra race conditions en cuestionarios largos)
+    let segundoDirectivoEfectivo = esSegundoDirectivo
+    if (version === 'D' && !esSegundoDirectivo) {
+      const { data: previo } = await supabase
+        .from('respuestas_dir')
+        .select('id')
+        .eq('empresa_codigo', codigo.toUpperCase())
+        .limit(1)
+      if (previo && previo.length > 0) {
+        segundoDirectivoEfectivo = true
+      }
+    }
+
     // Nota: se admiten múltiples respuestas de Dirección por empresa
     // (segundos directivos, miembros del comité directivo, etc.).
     // Los datos de empresa se heredan del primer directivo.
@@ -152,14 +203,26 @@ export default function Cuestionario({ version, demo = false }) {
     })
 
     // Campos comunes a todas las versiones
-    // Estrato: para D se calcula con datos recién recogidos; para MI/EO viene de empresa
-    const estratoFila = version === 'D'
+    // Estrato: para D primer directivo se calcula con datos recién recogidos;
+    //          para D segundo directivo y MI/EO se hereda de la empresa
+    const estratoFila = (version === 'D' && !segundoDirectivoEfectivo)
       ? calcEstrato(clasificacion?.empleados, clasificacion?.tiene_mi)
       : (empresa?.estrato || null)
     fila.estrato = estratoFila
 
+    // Diagnóstico: alertar si no se pudo calcular el estrato cuando se esperaba
+    if (!estratoFila && version === 'D' && !segundoDirectivoEfectivo) {
+      console.warn('Estrato no calculable para primer directivo', {
+        empleados: clasificacion?.empleados,
+        tieneMI:   clasificacion?.tiene_mi,
+      })
+      setErrorEnvio('Error de clasificación: no fue posible determinar el estrato de la empresa. Por favor, vuelva al inicio y revise los datos de empresa.')
+      setEnviando(false)
+      return
+    }
+
     fila.antiguedad_respondente    = clasificacion?.antiguedad_respondente || null
-    fila.disponibilidad_ampliacion = (version === 'D' && !esSegundoDirectivo) ? disponibilidad : null
+    fila.disponibilidad_ampliacion = (version === 'D' && !segundoDirectivoEfectivo) ? disponibilidad : null
     // Para D: usa el email recogido en clasificación; para MI/EO: el del cierre
     // Email de contacto: solo para dirección (recogido en clasificación)
     fila.email_contacto = version === 'D'
@@ -170,10 +233,10 @@ export default function Cuestionario({ version, demo = false }) {
     if (version === 'D') {
       // Para el segundo directivo, los datos de empresa se heredan de la fila ya creada;
       // para el primero, vienen del formulario de clasificación.
-      fila.sector                   = esSegundoDirectivo ? (empresa?.sector             || null) : (clasificacion?.sector                   || null)
-      fila.empleados                = esSegundoDirectivo ? (empresa?.empleados          || null) : (clasificacion?.empleados                || null)
-      fila.antiguedad_empresa       = esSegundoDirectivo ? (empresa?.antiguedad_empresa || null) : (clasificacion?.antiguedad_empresa       || null)
-      fila.empresa_familiar         = esSegundoDirectivo ? (empresa?.empresa_familiar   || null) : (clasificacion?.empresa_familiar         || null)
+      fila.sector                   = segundoDirectivoEfectivo ? (empresa?.sector             || null) : (clasificacion?.sector                   || null)
+      fila.empleados                = segundoDirectivoEfectivo ? (empresa?.empleados          || null) : (clasificacion?.empleados                || null)
+      fila.antiguedad_empresa       = segundoDirectivoEfectivo ? (empresa?.antiguedad_empresa || null) : (clasificacion?.antiguedad_empresa       || null)
+      fila.empresa_familiar         = segundoDirectivoEfectivo ? (empresa?.empresa_familiar   || null) : (clasificacion?.empresa_familiar         || null)
       fila.rol_directivo            = clasificacion?.rol_directivo            || null
       fila.formalizacion_estrategia = clasificacion?.formalizacion_estrategia || null
     }
@@ -189,7 +252,7 @@ export default function Cuestionario({ version, demo = false }) {
     }
 
     // ── Actualizar empresa con datos del directivo (solo el primer directivo)
-    if (version === 'D' && !esSegundoDirectivo && clasificacion?.sector) {
+    if (version === 'D' && !segundoDirectivoEfectivo && clasificacion?.sector) {
       await supabase.from('empresas').update({
         nombre:                   clasificacion.nombre_empresa || null,
         sector:                   clasificacion.sector,
@@ -199,6 +262,7 @@ export default function Cuestionario({ version, demo = false }) {
         rol_directivo:            clasificacion.rol_directivo            || null,
         formalizacion_estrategia: clasificacion.formalizacion_estrategia || null,
         estrato:                  estratoFila,
+        activa:                   true,
       }).eq('codigo', codigo.toUpperCase())
     }
 
@@ -212,6 +276,9 @@ export default function Cuestionario({ version, demo = false }) {
       return
     }
 
+    // Limpiar sessionStorage: cuestionario completado correctamente
+    try { sessionStorage.removeItem(sessionKey) } catch (e) {}
+
     navigate('/gracias', { state: { version, empresa: empresa.nombre, codigo: empresa.codigo } })
   }
 
@@ -224,6 +291,20 @@ export default function Cuestionario({ version, demo = false }) {
       </div>
       <div className="tarjeta-cuerpo">
         <span className={`version-badge ${BADGE[version]}`}>{VERSION_LABEL[version]}</span>
+
+        {esSegundoDirectivo && (
+          <div style={{
+            marginTop: 12,
+            padding: '12px 16px',
+            background: '#eef3fb',
+            border: '1.5px solid #bcd3f5',
+            borderRadius: 10,
+            fontSize: '0.88rem',
+            color: '#1e3a5f',
+          }}>
+            <strong>Directivo adicional</strong> · Su empresa ya cuenta con un cuestionario de Dirección registrado. Sus respuestas se añadirán como aportación adicional del equipo directivo y enriquecerán el diagnóstico de su empresa.
+          </div>
+        )}
 
         <div className="escala-explicacion" style={{ marginTop: 16 }}>
           <div className="escala-titulo">Escala de valoración (1–7)</div>
