@@ -37,12 +37,17 @@ function extraerDominio(email) {
 }
 
 
-// Calcula el estrato según el número de empleados
-const calcEstrato = (empleados) => {
+// Calcula el estrato según el número de empleados y la presencia de mando intermedio
+const calcEstrato = (empleados, tieneMI = null) => {
   const n = parseInt(empleados, 10)
   if (!n || isNaN(n)) return null
   if (n <= 9)   return 'A'
-  if (n <= 49)  return null  // B1/B2 se determina en Admin según mando intermedio
+  if (n <= 49) {
+    // En el rango 10-49, B1 (sin MI) o B2 (con MI) según respuesta del directivo
+    if (tieneMI === true)  return 'B2'
+    if (tieneMI === false) return 'B1'
+    return null  // dato pendiente
+  }
   if (n <= 249) return 'C'
   return null
 }
@@ -174,7 +179,7 @@ export default function Cuestionario({ version, demo = false }) {
 
     // ── Actualizar empresa con datos del directivo
     if (version === 'D' && clasificacion?.sector) {
-      const estratoCalculado = calcEstrato(clasificacion.empleados)
+      const estratoCalculado = calcEstrato(clasificacion.empleados, clasificacion.tiene_mi)
       await supabase.from('empresas').update({
         nombre:            clasificacion.nombre_empresa || null,
         sector:            clasificacion.sector,

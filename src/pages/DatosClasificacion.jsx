@@ -33,6 +33,10 @@ const FORMALIZACION = [
   'Mayoritariamente formalizada',
   'Totalmente formalizada y documentada',
 ]
+const TIENE_MI = [
+  'Sí, hay al menos un mando intermedio formal',
+  'No, la dirección coordina directamente al equipo operativo',
+]
 const ANTIGUEDAD_RESPONDENTE = [
   'Menos de 1 año','1 a 3 años','3 a 5 años','5 a 10 años','Más de 10 años'
 ]
@@ -91,6 +95,11 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
   const [sectorOtro, setSectorOtro] = useState('')
   const [rolDirectivo, setRolDirectivo] = useState('')
   const [formalizacion, setFormalizacion] = useState('')
+  const [tieneMI, setTieneMI] = useState('')
+
+  // Detecta si el tamaño elegido corresponde al estrato pequeño (10-49)
+  // donde es necesario preguntar por la presencia de mando intermedio
+  const esTamañoPequeño = empleados.startsWith('10 a 49')
 
   const [antiguedadRespondente, setAntiguedadRespondente] = useState('')
   const [area, setArea] = useState('')
@@ -103,6 +112,7 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
     if (needsEmpresaData) {
       if (!nombreEmpresa.trim() || !emailDirectivo.trim() || !emailValido(emailDirectivo) || !sector || !empleados || !antiguedadEmpresa || !familiar || !rolDirectivo || !formalizacion) return false
       if (sector === 'Otro' && !sectorOtro.trim()) return false
+      if (esTamañoPequeño && !tieneMI) return false
     }
     if (!antiguedadRespondente) return false
     if (version !== 'D') {
@@ -124,6 +134,7 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
       empresa_familiar: familiar,
       rol_directivo: rolDirectivo,
       formalizacion_estrategia: formalizacion,
+      tiene_mi: esTamañoPequeño ? (tieneMI === 'Sí, hay al menos un mando intermedio formal') : null,
       antiguedad_respondente: antiguedadRespondente,
       area_funcional: area === 'Otro' ? areaOtro : area,
       tipo_contrato: contrato,
@@ -184,6 +195,15 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
           <Campo label="Número de empleados" required>
             <Select value={empleados} onChange={setEmpleados} options={EMPLEADOS} />
           </Campo>
+
+          {esTamañoPequeño && (
+            <Campo label="¿Su empresa cuenta con mandos intermedios formalizados?" required>
+              <Select value={tieneMI} onChange={setTieneMI} options={TIENE_MI} />
+              <div style={{ fontSize: '0.78rem', color: '#888', marginTop: 4 }}>
+                Se considera mando intermedio formal a una persona con cargo reconocido en la empresa (jefe de equipo, responsable de área, supervisor, etc.) que (1) ocupa una posición intermedia entre la dirección y el personal operativo, (2) supervisa de forma habitual el trabajo de al menos una persona y (3) actúa como enlace en la transmisión de directrices. La coordinación puntual sin cargo reconocido no constituye un mando intermedio formal.
+              </div>
+            </Campo>
+          )}
 
           <Campo label="Antigüedad de la empresa" required>
             <Select value={antiguedadEmpresa} onChange={setAntiguedadEmpresa} options={ANTIGUEDAD_EMPRESA} />

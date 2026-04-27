@@ -42,11 +42,18 @@ export default function App({ demo = false }) {
     if (!codigo || demo) return
     supabase
       .from('empresas')
-      .select('nombre, sector')
+      .select('nombre, sector, estrato')
       .eq('codigo', codigo.toUpperCase())
       .maybeSingle()
       .then(({ data }) => { if (data) setEmpresa(data) })
   }, [codigo, demo])
+
+  // Filtra perfiles según estrato: oculta MI en A y B1
+  const perfilesVisibles = PERFILES.filter(p => {
+    if (p.id !== 'MI') return true
+    if (!empresa?.estrato) return true  // sin estrato aún, mostrar todos
+    return empresa.estrato === 'B2' || empresa.estrato === 'C'
+  })
 
   const handleComenzar = async () => {
     if (!perfil) return
@@ -156,7 +163,7 @@ export default function App({ demo = false }) {
           <div className="perfil-titulo">Seleccione su perfil en la organización</div>
 
           <div className="perfiles-lista">
-            {PERFILES.map(p => (
+            {perfilesVisibles.map(p => (
               <div key={p.id}>
                 <button
                   type="button"
@@ -165,7 +172,7 @@ export default function App({ demo = false }) {
                     borderColor: perfil === p.id ? p.color : '#d1d9e6',
                     background:  perfil === p.id ? p.bg   : '#fff',
                   }}
-                  onClick={() => { setPerfil(p.id); setInfoAbierto(null); setError('') }}
+                  onClick={() => { setPerfil(p.id); setError('') }}
                 >
                   <div className="perfil-btn-inner">
                     <span className="perfil-radio"
