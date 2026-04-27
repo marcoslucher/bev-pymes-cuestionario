@@ -116,6 +116,8 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
     }
     if (!antiguedadRespondente) return false
     if (version === 'D' && !rolDirectivo) return false
+    // Para el segundo directivo el email es opcional, pero si lo escribe debe ser válido
+    if (version === 'D' && !needsEmpresaData && emailDirectivo.trim() && !emailValido(emailDirectivo)) return false
     if (version !== 'D') {
       if (!area || !contrato) return false
       if (area === 'Otro' && !areaOtro.trim()) return false
@@ -243,6 +245,26 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
         {version === 'D' && (
           <Campo label="Rol en la empresa" required>
             <Select value={rolDirectivo} onChange={setRolDirectivo} options={ROL_DIRECTIVO} />
+          </Campo>
+        )}
+
+        {version === 'D' && !needsEmpresaData && (
+          <Campo label="Email de contacto (opcional)">
+            <input
+              type="email"
+              className="campo-input"
+              placeholder="correo@empresa.com"
+              value={emailDirectivo}
+              onChange={e => setEmailDirectivo(e.target.value)}
+            />
+            {emailDirectivo && !emailValido(emailDirectivo) && (
+              <div style={{ fontSize: '0.78rem', color: '#e53e3e', marginTop: 4 }}>
+                Introduzca un email válido (ejemplo: nombre@empresa.com).
+              </div>
+            )}
+            <div style={{ fontSize: '0.78rem', color: '#888', marginTop: 4 }}>
+              Si desea recibir copia del informe de resultados directamente, indique su email. En caso contrario, el primer directivo de su empresa lo recibirá y podrá compartirlo internamente.
+            </div>
           </Campo>
         )}
 
