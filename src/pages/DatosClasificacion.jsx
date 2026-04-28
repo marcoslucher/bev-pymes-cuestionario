@@ -37,6 +37,12 @@ const TIENE_MI = [
   'Sí, hay al menos un mando intermedio formal',
   'No, la dirección coordina directamente al equipo operativo',
 ]
+const COMUNIDADES = [
+  'Andalucía','Aragón','Asturias','Baleares','Canarias','Cantabria',
+  'Castilla y León','Castilla-La Mancha','Cataluña','Comunidad Valenciana',
+  'Extremadura','Galicia','La Rioja','Madrid','Murcia','Navarra',
+  'País Vasco','Ceuta','Melilla',
+]
 const ANTIGUEDAD_RESPONDENTE = [
   'Menos de 1 año','1 a 3 años','3 a 5 años','5 a 10 años','Más de 10 años'
 ]
@@ -93,6 +99,7 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
   const [antiguedadEmpresa, setAntiguedadEmpresa] = useState('')
   const [familiar, setFamiliar] = useState('')
   const [sectorOtro, setSectorOtro] = useState('')
+  const [comunidad, setComunidad] = useState('')
   const [rolDirectivo, setRolDirectivo] = useState('')
   const [formalizacion, setFormalizacion] = useState('')
   const [tieneMI, setTieneMI] = useState('')
@@ -110,7 +117,7 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
 
   const isValid = () => {
     if (needsEmpresaData) {
-      if (!nombreEmpresa.trim() || !emailDirectivo.trim() || !emailValido(emailDirectivo) || !sector || !empleados || !antiguedadEmpresa || !familiar || !formalizacion) return false
+      if (!nombreEmpresa.trim() || !emailDirectivo.trim() || !emailValido(emailDirectivo) || !sector || !empleados || !antiguedadEmpresa || !familiar || !formalizacion || !comunidad) return false
       if (sector === 'Otro' && !sectorOtro.trim()) return false
       if (esTamañoPequeño && !tieneMI) return false
     }
@@ -135,6 +142,7 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
       empleados,
       antiguedad_empresa: antiguedadEmpresa,
       empresa_familiar: familiar,
+      comunidad_autonoma: needsEmpresaData ? comunidad : empresaDatos?.comunidad_autonoma,
       rol_directivo: rolDirectivo,
       formalizacion_estrategia: formalizacion,
       tiene_mi: esTamañoPequeño ? (tieneMI === 'Sí, hay al menos un mando intermedio formal') : null,
@@ -214,6 +222,13 @@ export default function DatosClasificacion({ version, empresaDatos, onComplete, 
 
           <Campo label="¿Es una empresa familiar?" required>
             <Select value={familiar} onChange={setFamiliar} options={FAMILIAR} />
+          </Campo>
+
+          <Campo label="Comunidad autónoma de la sede principal" required>
+            <Select value={comunidad} onChange={setComunidad} options={COMUNIDADES} />
+            <div style={{ fontSize: '0.78rem', color: '#888', marginTop: 4 }}>
+              Indique la comunidad autónoma donde se localiza el centro principal de actividad de la empresa. Si la empresa cuenta con varios centros, seleccione la comunidad donde se concentra la mayor parte de la actividad operativa.
+            </div>
           </Campo>
 
           <Campo label="¿En qué medida dispone su empresa de una estrategia formalizada y documentada?" required>

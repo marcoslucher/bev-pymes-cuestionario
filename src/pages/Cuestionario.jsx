@@ -123,7 +123,7 @@ export default function Cuestionario({ version, demo = false }) {
     const verificar = async () => {
       const { data, error } = await supabase
         .from('empresas')
-        .select('codigo, nombre, estrato, sector, empleados, antiguedad_empresa, empresa_familiar, formalizacion_estrategia')
+        .select('codigo, nombre, estrato, sector, empleados, antiguedad_empresa, empresa_familiar, formalizacion_estrategia, comunidad_autonoma')
         .eq('codigo', codigo.toUpperCase())
         .single()
       if (error || !data) { navigate('/'); return }
@@ -239,6 +239,7 @@ export default function Cuestionario({ version, demo = false }) {
       fila.empleados                = segundoDirectivoEfectivo ? (empresa?.empleados                || null) : (clasificacion?.empleados                || null)
       fila.antiguedad_empresa       = segundoDirectivoEfectivo ? (empresa?.antiguedad_empresa       || null) : (clasificacion?.antiguedad_empresa       || null)
       fila.empresa_familiar         = segundoDirectivoEfectivo ? (empresa?.empresa_familiar         || null) : (clasificacion?.empresa_familiar         || null)
+      fila.comunidad_autonoma       = segundoDirectivoEfectivo ? (empresa?.comunidad_autonoma       || null) : (clasificacion?.comunidad_autonoma       || null)
       fila.formalizacion_estrategia = segundoDirectivoEfectivo ? (empresa?.formalizacion_estrategia || null) : (clasificacion?.formalizacion_estrategia || null)
       fila.rol_directivo            = clasificacion?.rol_directivo || null
     }
@@ -261,6 +262,7 @@ export default function Cuestionario({ version, demo = false }) {
         empleados:                clasificacion.empleados,
         antiguedad_empresa:       clasificacion.antiguedad_empresa,
         empresa_familiar:         clasificacion.empresa_familiar,
+        comunidad_autonoma:       clasificacion.comunidad_autonoma       || null,
         rol_directivo:            clasificacion.rol_directivo            || null,
         formalizacion_estrategia: clasificacion.formalizacion_estrategia || null,
         estrato:                  estratoFila,
